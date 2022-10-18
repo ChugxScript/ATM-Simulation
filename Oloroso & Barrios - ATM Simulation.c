@@ -12,30 +12,30 @@ typedef struct details{
     char birthday[31];
     int contactNumber;
     int initialDeposit;
-    int pinCode;
+    char pinCode[7];
 }REC;
 typedef struct node{
     REC atm;
     struct node* next;
 }LIST; LIST *L;
 
+void piin(){
+    int i;
+    for (i = 0;i<6;i++){
+        L->atm.pinCode[i]=getch();
+        putchar('*');
+    } L->atm.pinCode[i]='\0';
+}
+
 void insertcard(){
     FILE *fp;
     do{ system("cls");
         printf("Please insert card...");
-        fp=fopen("f:\mypin.txt","r");
+        fp=fopen("F:\pakanangpakshet.txt","r");
     } while(fp==NULL);
     fclose(fp);
     printf("Thank you. Please enter PIN: ");
-    pin();
-}
-
-void pin(){
-    int i;
-    for (i = 0;i<6;i++){
-        PIN[i]=getch();
-        putchar('*');
-    } PIN[i]='\0';
+    piin();
 }
 
 void makenull(){
@@ -47,7 +47,7 @@ void addNewATMaccount(REC x){
     q=p=L;
     temp = (LIST*) ((malloc(sizeof(LIST))));
     temp->atm = x;
-    while (p!=NULL && strcmp (x.name, p->atm.name)>=0){
+    while (p!=NULL && strcmp (x.accountName, p->atm.accountName)>=0){
         q=p;
         p=p->next;
     }
@@ -60,30 +60,39 @@ void addNewATMaccount(REC x){
 
 void updateAccount(char n[31]){
     int x;
-    int p = locate(n);
-    if (p<0){
-        cout <<"Not found."<<endl;
-        system("pause");
-    } else {
-        while(x!=4){
+    LIST *p, *q;
+    p=q=L;
+    while(p!=NULL && strcmp (n, p->atm.accountName)!=0){
+        q=p;
+        p=p->next;
+    }
+    if (p==NULL){
+        printf("Not found.\n");system("pause");
+    }else{
+        while(x!=6){
             system("cls");
-            cout<<"Student updating: "<<endl;
-            cout<<"Name: "<<n<<endl;
-            cout<<"Quiz 1: "<<L.sRec[p].q1<<endl;
-            cout<<"Quiz 2: "<<L.sRec[p].q2<<endl;
-            cout<<"Quiz 3: "<<L.sRec[p].q3<<endl;
-            cout<<endl<<"Update: "<<endl<<endl;
-            cout<<"[1] Quiz 1"<<endl;
-            cout<<"[2] Quiz 2"<<endl;
-            cout<<"[3] Quiz 3"<<endl;
-            cout<<"[4] Return to menu"<<endl<<endl;
-            cout<<"Enter a Number: "; cin>>x;
+            printf("Updating Account: \n");
+            printf("\nAccount Number: %d",p->atm.accountNumber);
+            printf("\nAccount Name: %s",p->atm.accountName);
+            printf("\nBirthday: %s",p->atm.birthday);
+            printf("\nContact Number: %d",p->atm.contactNumber);
+            printf("\nPIN Code: %d",p->atm.pinCode);
+            printf("\nUPDATE: \n");
+            printf("\n[1] Account Number");
+            printf("\n[2] Account Name");
+            printf("\n[3] Birthday");
+            printf("\n[4] Contact Number");
+            printf("\n[5] PIN Code");
+            printf("\n[6] Back");
+            printf("\n\nEnter a Number: ");scanf("%d", &x);
             switch(x){
-                case 1: cout<<"Input new score: ";cin>>L.sRec[p].q1;break;
-                case 2: cout<<"Input new score: ";cin>>L.sRec[p].q2;break;
-                case 3: cout<<"Input new score: ";cin>>L.sRec[p].q3;break;
-                case 4: cout<<n<<" record is successfuly updated."<<endl;system("pause");break;
-                default: cout<<"Select 1-4 only."<<endl;system("pause");
+                case 1: printf("\nInput new Account Number: ");scanf("%d", &p->atm.accountNumber);break;
+                case 2: printf("\nInput new Account Name: ");scanf("%d",p->atm.accountName);break;
+                case 3: printf("\nInput new Birthday: ");scanf("%d",p->atm.birthday);break;
+                case 4: printf("\nInput new Contact Number: ");scanf("%d", &p->atm.contactNumber);break;
+                case 5: printf("\nInput new PIN Code: ");scanf("%d", &p->atm.pinCode);break;
+                case 6: printf("\n%s's account is successfully updated.", p->atm.accountName);system("pause");break;
+                default: printf("\nSelect 1-6 only\n");system("pause");
             }
         }
     }
@@ -92,7 +101,7 @@ void updateAccount(char n[31]){
 void deleteAccount(char n[31]){
     LIST *p, *q;
     p=q=L;
-    while(p!=NULL && strcmp (n, p->atm.name)!=0){
+    while(p!=NULL && strcmp (n, p->atm.accountName)!=0){
         q=p;
         p=p->next;
     }
@@ -128,7 +137,10 @@ int otherTransactionMenu(){
     printf("\nEnter your choice 1-3: ");
     scanf("%d", &UserNum);
     switch(UserNum){
-        case 1: system("cls");break;
+        case 1: system("cls");
+                //gusto ko pa sana maglagay dito ng "Enter your pin code" if same continue else back
+                printf("Name of student you want to update: "); scanf(" %[^\n]s",other.accountName);
+                updateAccount(other.accountName);break;
         case 2: system("cls");
                 //gusto ko pa sana maglagay dito ng "Enter your pin code" if same continue else back
                 printf("Name of student you want to delete: "); scanf(" %[^\n]s",other.accountName);
@@ -137,7 +149,7 @@ int otherTransactionMenu(){
         default:system("cls");break;
     }
 }
-int transactionMenu()[
+int transactionMenu(){
     int UserNum;
     printf("Choose Transaction: \n");
     printf("[1] Balance Inquiry\n");
@@ -154,7 +166,7 @@ int transactionMenu()[
     }else{
         otherTransactionMenu();
     }
-]
+}
 int main(){
     REC bdo;
     insertcard();
@@ -176,7 +188,7 @@ int main(){
                     while(1){
                         switch(transactionMenu()){
                             case 1: break;
-                            default:
+                            default: break;
                         }
                     }
                     /*printf("Name of student you want to delete: "); scanf(" %[^\n]s",sr.name);
