@@ -5,6 +5,7 @@ by Andrew R. Oloroso and Armand Angelo C. Barrios*/
 #include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h> //for isdigit()
 
 typedef struct details{
     char accountName[31];
@@ -19,12 +20,69 @@ typedef struct node{
     struct node* next;
 }LIST; LIST *L;
 
-void piin(){
-    int i;
-    for (i = 0;i<6;i++){
-        L->atm.pinCode[i]=getch();
-        putchar('*');
-    } L->atm.pinCode[i]='\0';
+char c,ping[7];
+void checkAccount(char n[31]){  //it looks like locate in array
+    LIST *p, *q;
+    p=q=L;
+    while(p!=NULL && strcmp (n, p->atm.pinCode)!=0){
+        q=p;
+        p=p->next;
+    }
+    if (p==NULL){
+        printf("\nWala ka pang Account tangina mo bat ka nag enter ng pin!?\n");
+        printf("\nDo you want to create an Account?\n");
+        printf(" [Y] if Yes. [N] if No.");
+        c = getch();
+        if(c == 'n' || c == 'N'){
+            exit(0);
+        }else{
+            accountDetails();
+        }
+    }else{
+        printf("\nWag ka mag wiwithdraw mauubos pera mo %s!",p->atm.accountName);system("pause");
+    }
+}
+
+void encrypt(){
+    int i=0;
+    while(ping[i]!='\0'){
+        ping[i]=ping[i] + 70;
+        i++;
+    }
+}
+
+void decrypt(){
+    int i=0;
+    while(ping[i]!='\0'){
+        ping[i]=ping[i] - 70;
+        i++;
+    }
+}
+
+void pin(){
+    int index =0;
+    char ch;
+    printf("Enter PIN: ");
+    while((ch=getch())!=13 && index<5){
+        if (index<0){
+            index=0;
+        }
+        if(ch==8){  //backspace ascii is 8
+            putch('\b'); putch(' ');
+            putch('\b'); index--;
+            continue;
+        }
+        if(isdigit(ch)){
+         ping[index++]=ch;
+         putchar('*');
+        }
+    }
+    if (index==5){
+        ping[index++]=ch;
+    }ping[index]='\0';
+    encrypt(); printf("\n\nEncrypted Pin Code = %s\n",ping); system("pause");
+    decrypt(); printf("\nDecrypted Pin Code = %s\n",ping); system("pause");
+    checkAccount(ping);
 }
 
 void insertcard(){
@@ -34,8 +92,8 @@ void insertcard(){
         fp=fopen("F:\pakanangpakshet.txt","r");
     } while(fp==NULL);
     fclose(fp);
-    printf("Thank you. Please enter PIN: ");
-    piin();
+    printf("\nCard inserted successfully.\n");
+    pin();
 }
 
 void makenull(){
@@ -167,6 +225,20 @@ int transactionMenu(){
         otherTransactionMenu();
     }
 }
+
+void accountDetails(){
+    REC bpi;
+    system("cls"); printf("REGISTRATION MODULE\n"); printf("Please fill out the following informations: \n\n");
+    printf("\nAccount Number (5 Digits): ");scanf("%d", &bpi.accountNumber);
+    printf("\nAccount Name: "); scanf(" %[^\n]s",bpi.accountName);
+    printf("\nBirthday (MM/DD/YY): "); scanf(" %[^\n]s",bpi.birthday);
+    printf("\nContact Number: ");scanf("%d", &bpi.accountNumber);
+    printf("\nInitial Deposit (Min. 5,000): ");scanf("%d", &bpi.initialDeposit);
+    printf("\nPIN Code: ");scanf("%d", &bpi.pinCode);
+    addNewATMaccount(bpi);
+    printf("\nRegistration Successfull\nCongratulations %s! Welcome to Bank Rupt.\n", bpi.accountName);
+    system("pause");
+}
 int main(){
     REC bdo;
     insertcard();
@@ -174,16 +246,7 @@ int main(){
     while(1){
         system ("cls");
         switch(menu()){
-            case 1: system("cls"); printf("REGISTRATION MODULE\n"); printf("Please fill out the following informations: \n\n");
-                    printf("\nAccount Number (5 Digits): ");scanf("%d", &bdo.accountNumber);
-                    printf("\nAccount Name: "); scanf(" %[^\n]s",bdo.accountName);
-                    printf("\nBirthday (MM/DD/YY): "); scanf(" %[^\n]s",bdo.birthday);
-                    printf("\nContact Number: ");scanf("%d", &bdo.accountNumber);
-                    printf("\nInitial Deposit (Min. 5,000): ");scanf("%d", &bdo.initialDeposit);
-                    printf("\nPIN Code: ");scanf("%d", &bdo.pinCode);
-                    addNewATMaccount(bdo);
-                    printf("\nRegistration Successfull\nCongratulations %s! Welcome to Bank Rupt.\n", bdo.accountName);
-                    system("pause"); break;
+            case 1:  break;
             case 2: system("cls"); printf("TRANSACTION MODULE\n\n");
                     while(1){
                         switch(transactionMenu()){
