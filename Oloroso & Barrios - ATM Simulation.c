@@ -21,7 +21,42 @@ typedef struct node{
 }LIST; LIST *L;
 
 char c,ping[7];
-void checkAccount(char n[31]){  //it looks like locate in array
+void insertcard(){
+    FILE *fp;
+    do{ system("cls");
+        printf("Please insert card...");
+        fp=fopen("F:\pakanangpakshet.txt","r+");
+    } while(fp==NULL);
+    fclose(fp);
+    printf("\nCard inserted successfully.\n"); system("pause");
+}
+
+void USER(){
+    int x;
+    printf("\nAre you a NEW or EXISTING user?\n");
+    printf(" [1] if NEW [2] if EXISTING."); scanf("%d", &x);
+    if(x==1){
+        regMode();
+    }else{
+        pin();
+    }
+}
+
+void regMode(){
+    REC bpi;
+    system("cls"); printf("REGISTRATION MODULE\n"); printf("Please fill out the following informations: \n\n");
+    printf("\nAccount Number (5 Digits): ");scanf("%d", &bpi.accountNumber);
+    printf("\nAccount Name: "); scanf(" %[^\n]s",bpi.accountName);
+    printf("\nBirthday (MM/DD/YY): "); scanf(" %[^\n]s",bpi.birthday);
+    printf("\nContact Number: ");scanf("%d", &bpi.accountNumber);
+    printf("\nInitial Deposit (Min. 5,000): ");scanf("%d", &bpi.initialDeposit);
+    printf("\nPIN Code: ");scanf("%d", &bpi.pinCode);
+    addNewATMaccount(bpi);
+    printf("\nRegistration Successfull\nCongratulations %s! Welcome to Bank Rupt.\n", bpi.accountName);
+    system("pause");
+}
+
+void checkPin(char n[31]){  //it looks like locate in array
     LIST *p, *q;
     p=q=L;
     while(p!=NULL && strcmp (n, p->atm.pinCode)!=0){
@@ -36,7 +71,7 @@ void checkAccount(char n[31]){  //it looks like locate in array
         if(c == 'n' || c == 'N'){
             exit(0);
         }else{
-            accountDetails();
+            regMode();
         }
     }else{
         printf("\nWag ka mag wiwithdraw mauubos pera mo %s!",p->atm.accountName);system("pause");
@@ -60,6 +95,7 @@ void decrypt(){
 }
 
 void pin(){
+    REC x;
     int index =0;
     char ch;
     printf("Enter PIN: ");
@@ -73,27 +109,16 @@ void pin(){
             continue;
         }
         if(isdigit(ch)){
-         ping[index++]=ch;
+         strcpy(x.pinCode[index++],ch);
          putchar('*');
         }
     }
     if (index==5){
-        ping[index++]=ch;
-    }ping[index]='\0';
-    encrypt(); printf("\n\nEncrypted Pin Code = %s\n",ping); system("pause");
-    decrypt(); printf("\nDecrypted Pin Code = %s\n",ping); system("pause");
-    checkAccount(ping);
-}
-
-void insertcard(){
-    FILE *fp;
-    do{ system("cls");
-        printf("Please insert card...");
-        fp=fopen("F:\pakanangpakshet.txt","r");
-    } while(fp==NULL);
-    fclose(fp);
-    printf("\nCard inserted successfully.\n");
-    pin();
+        strcpy(x.pinCode[index++],ch);
+    }strcpy(x.pinCode[index++],'\0');
+    encrypt(); printf("\n\nEncrypted Pin Code = %s\n",x.pinCode); system("pause");
+    decrypt(); printf("\nDecrypted Pin Code = %s\n",x.pinCode); system("pause");
+    checkPin(x.pinCode);
 }
 
 void makenull(){
@@ -140,16 +165,14 @@ void updateAccount(char n[31]){
             printf("\n[2] Account Name");
             printf("\n[3] Birthday");
             printf("\n[4] Contact Number");
-            printf("\n[5] PIN Code");
-            printf("\n[6] Back");
+            printf("\n[5] Back");
             printf("\n\nEnter a Number: ");scanf("%d", &x);
             switch(x){
                 case 1: printf("\nInput new Account Number: ");scanf("%d", &p->atm.accountNumber);break;
                 case 2: printf("\nInput new Account Name: ");scanf("%d",p->atm.accountName);break;
                 case 3: printf("\nInput new Birthday: ");scanf("%d",p->atm.birthday);break;
                 case 4: printf("\nInput new Contact Number: ");scanf("%d", &p->atm.contactNumber);break;
-                case 5: printf("\nInput new PIN Code: ");scanf("%d", &p->atm.pinCode);break;
-                case 6: printf("\n%s's account is successfully updated.", p->atm.accountName);system("pause");break;
+                case 5: printf("\n%s's account is successfully updated.", p->atm.accountName);system("pause");break;
                 default: printf("\nSelect 1-6 only\n");system("pause");
             }
         }
@@ -178,7 +201,7 @@ void deleteAccount(char n[31]){
 int menu(){
     int UserNum;
     printf("Choose Module: \n");
-    printf("[1] REGISTRATION MODULE\n");
+    printf("[1] ACCOUNT\n");
     printf("[2] TRANSACTION MODULE\n");
     printf("[3] EXIT\n");
     printf("\nEnter your choice 1-3: ");
@@ -226,27 +249,15 @@ int transactionMenu(){
     }
 }
 
-void accountDetails(){
-    REC bpi;
-    system("cls"); printf("REGISTRATION MODULE\n"); printf("Please fill out the following informations: \n\n");
-    printf("\nAccount Number (5 Digits): ");scanf("%d", &bpi.accountNumber);
-    printf("\nAccount Name: "); scanf(" %[^\n]s",bpi.accountName);
-    printf("\nBirthday (MM/DD/YY): "); scanf(" %[^\n]s",bpi.birthday);
-    printf("\nContact Number: ");scanf("%d", &bpi.accountNumber);
-    printf("\nInitial Deposit (Min. 5,000): ");scanf("%d", &bpi.initialDeposit);
-    printf("\nPIN Code: ");scanf("%d", &bpi.pinCode);
-    addNewATMaccount(bpi);
-    printf("\nRegistration Successfull\nCongratulations %s! Welcome to Bank Rupt.\n", bpi.accountName);
-    system("pause");
-}
 int main(){
     REC bdo;
     insertcard();
+    USER();
     makenull();
     while(1){
         system ("cls");
         switch(menu()){
-            case 1:  break;
+            case 1: system("cls"); regMode(); break;
             case 2: system("cls"); printf("TRANSACTION MODULE\n\n");
                     while(1){
                         switch(transactionMenu()){
