@@ -6,11 +6,12 @@ by Andrew R. Oloroso and Armand Angelo C. Barrios*/
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h> //for isdigit()
+#include <time.h>
 
 typedef struct details{
     char accountName[31];
     int accountNumber;
-    char birthday[31];
+    int month,day,year; //birthday
     int contactNumber;
     int initialDeposit;
     char pinCode[7];
@@ -20,7 +21,12 @@ typedef struct node{
     struct node* next;
 }LIST; LIST *L;
 
-char c,ping[7];
+char c,ping[7]; //global variable
+
+void makenull(){
+    L=NULL;
+}
+
 void insertcard(){
     FILE *fp;
     do{ system("cls");
@@ -31,98 +37,56 @@ void insertcard(){
     printf("\nCard inserted successfully.\n"); system("pause");
 }
 
-void USER(){
+int isUSER(){
     int x;
     printf("\nAre you a NEW or EXISTING user?\n");
-    printf(" [1] if NEW [2] if EXISTING."); scanf("%d", &x);
-    if(x==1){
-        regMode();
+    printf("Press [1] if NEW [2] if EXISTING\n"); scanf("%d", &x);
+    return x;
+}
+
+void birthDayy(REC sm){
+    int x,y,z;
+    printf("\nBirthday (MM/DD/YYYY)\n");
+    a:
+    printf("\nIf your birth month is January, enter 01");
+    printf("\nEnter your birth month: ");scanf("%d",&x);
+    if(x<=0 || x>12){
+        printf("\nInvalid Month.");system("pause");
+        goto a;
     }else{
-        pin();
+        sm.month=x;
+    }
+    b:
+    printf("\nEnter your birth day: ");scanf("%d",&y);
+    if(y<=0 || y>31){
+        printf("\nInvalid Day.");system("pause");
+        goto b;
+    }else{
+        sm.day=y;
+    }
+    c:
+    printf("\nEnter your birth year: ");scanf("%d",&z);
+    if(z<=0 || z>2023){
+        printf("\nInvalid Year.");system("pause");
+        goto c;
+    }else{
+        sm.year=z;
     }
 }
 
-void regMode(){
-    REC bpi;
-    system("cls"); printf("REGISTRATION MODULE\n"); printf("Please fill out the following informations: \n\n");
-    printf("\nAccount Number (5 Digits): ");scanf("%d", &bpi.accountNumber);
+void regMode(REC bpi){
+    int marker=0;
+    bpi.accountNumber = rand() % 99999 + 0; //generate 5 digit numbers from 0 to 99999
+    system("cls");
+    printf("REGISTRATION MODULE\n");
+    printf("Please fill out the following informations: \n\n");
+    printf("\nAccount Number: %d",bpi.accountNumber);
     printf("\nAccount Name: "); scanf(" %[^\n]s",bpi.accountName);
-    printf("\nBirthday (MM/DD/YY): "); scanf(" %[^\n]s",bpi.birthday);
+    birthDayy(bpi);
+    printf("\nBirthday (MM/DD/YYYY): %d / %d / %d",bpi.month,bpi.day,bpi.year);
     printf("\nContact Number: ");scanf("%d", &bpi.accountNumber);
     printf("\nInitial Deposit (Min. 5,000): ");scanf("%d", &bpi.initialDeposit);
     printf("\nPIN Code: ");scanf("%d", &bpi.pinCode);
-    addNewATMaccount(bpi);
-    printf("\nRegistration Successfull\nCongratulations %s! Welcome to Bank Rupt.\n", bpi.accountName);
-    system("pause");
-}
-
-void checkPin(char n[31]){  //it looks like locate in array
-    LIST *p, *q;
-    p=q=L;
-    while(p!=NULL && strcmp (n, p->atm.pinCode)!=0){
-        q=p;
-        p=p->next;
-    }
-    if (p==NULL){
-        printf("\nWala ka pang Account tangina mo bat ka nag enter ng pin!?\n");
-        printf("\nDo you want to create an Account?\n");
-        printf(" [Y] if Yes. [N] if No.");
-        c = getch();
-        if(c == 'n' || c == 'N'){
-            exit(0);
-        }else{
-            regMode();
-        }
-    }else{
-        printf("\nWag ka mag wiwithdraw mauubos pera mo %s!",p->atm.accountName);system("pause");
-    }
-}
-
-void encrypt(){
-    int i=0;
-    while(ping[i]!='\0'){
-        ping[i]=ping[i] + 70;
-        i++;
-    }
-}
-
-void decrypt(){
-    int i=0;
-    while(ping[i]!='\0'){
-        ping[i]=ping[i] - 70;
-        i++;
-    }
-}
-
-void pin(){
-    REC x;
-    int index =0;
-    char ch;
-    printf("Enter PIN: ");
-    while((ch=getch())!=13 && index<5){
-        if (index<0){
-            index=0;
-        }
-        if(ch==8){  //backspace ascii is 8
-            putch('\b'); putch(' ');
-            putch('\b'); index--;
-            continue;
-        }
-        if(isdigit(ch)){
-         strcpy(x.pinCode[index++],ch);
-         putchar('*');
-        }
-    }
-    if (index==5){
-        strcpy(x.pinCode[index++],ch);
-    }strcpy(x.pinCode[index++],'\0');
-    encrypt(); printf("\n\nEncrypted Pin Code = %s\n",x.pinCode); system("pause");
-    decrypt(); printf("\nDecrypted Pin Code = %s\n",x.pinCode); system("pause");
-    checkPin(x.pinCode);
-}
-
-void makenull(){
-    L=NULL;
 }
 
 void addNewATMaccount(REC x){
@@ -141,8 +105,72 @@ void addNewATMaccount(REC x){
     }temp->next = p;
 }
 
+void pin(){
+    REC x;
+    int index =0;
+    int y=0,z=0;
+    char ch;
+    printf("Enter PIN: ");
+    while((ch=getch())!=13 && index<5){
+        if (index<0){
+            index=0;
+        }
+        if(ch==8){  //backspace ascii is 8
+            putch('\b'); putch(' ');
+            putch('\b'); index--;
+            continue;
+        }
+        if(isdigit(ch)){ //check if the input is digit if digit print * else no print
+         x.pinCode[index++]=ch;
+         putchar('*');
+        }
+    }
+    if (index==5){
+        x.pinCode[index++]=ch;
+    }x.pinCode[index]='\0';
+    printf("\n\nPin Code = %s\n",x.pinCode); system("pause");
+
+    //encrypt
+    while(x.pinCode[y]!='\0'){
+        x.pinCode[y]=x.pinCode[y] + 70;
+        y++;
+    }printf("\n\nEncrypted Pin Code = %s\n",x.pinCode); system("pause");
+
+    //decrypt
+    while(x.pinCode[z]!='\0'){
+        x.pinCode[z]=x.pinCode[z] - 70;
+        z++;
+    }printf("\nDecrypted Pin Code = %s\n",x.pinCode); system("pause");
+}
+
+void checkPin(char n[31]){  //it looks like locate in array
+    LIST *p, *q;
+    p=q=L;
+    while(p!=NULL && strcmp (n, p->atm.pinCode)!=0){
+        q=p;
+        p=p->next;
+    }
+    if (p==NULL){
+        printf("\nWrong PIN Code\n");system("pause");
+    }else{
+        printf("\nWelcome %s!",p->atm.accountName);system("pause");
+    }
+}
+
+int menu(){
+    int UserNum;
+    printf("Choose Module: \n");
+    printf("[1] ACCOUNT\n");
+    printf("[2] TRANSACTION MODULE\n");
+    printf("[3] EXIT\n");
+    printf("\nEnter your choice 1-3: ");
+    scanf("%d", &UserNum);
+    return UserNum;
+}
+
 void updateAccount(char n[31]){
-    int x;
+    int marker=0;
+    int x=0,y=0,z=0;
     LIST *p, *q;
     p=q=L;
     while(p!=NULL && strcmp (n, p->atm.accountName)!=0){
@@ -157,7 +185,7 @@ void updateAccount(char n[31]){
             printf("Updating Account: \n");
             printf("\nAccount Number: %d",p->atm.accountNumber);
             printf("\nAccount Name: %s",p->atm.accountName);
-            printf("\nBirthday: %s",p->atm.birthday);
+            printf("\nBirthday: %d / %d / %d",p->atm.month,p->atm.day,p->atm.year);
             printf("\nContact Number: %d",p->atm.contactNumber);
             printf("\nPIN Code: %d",p->atm.pinCode);
             printf("\nUPDATE: \n");
@@ -170,7 +198,22 @@ void updateAccount(char n[31]){
             switch(x){
                 case 1: printf("\nInput new Account Number: ");scanf("%d", &p->atm.accountNumber);break;
                 case 2: printf("\nInput new Account Name: ");scanf("%d",p->atm.accountName);break;
-                case 3: printf("\nInput new Birthday: ");scanf("%d",p->atm.birthday);break;
+                case 3: while(marker!=1){
+                            printf("\nInput new Birthday (MM/DD/YYYY)\n");
+                            do{
+                                printf("\nIf your birth month is January, enter 01");
+                                printf("\nEnter your birth month: ");scanf("%d",&x);
+                                system("cls");
+                            }while(x>0 && x<=12); p->atm.month=x;
+                            do{
+                                printf("\nEnter your birth day: ");scanf("%d",&y);
+                                system("cls");
+                            }while(y>0 && y<=31); p->atm.day=y;
+                            do{
+                                printf("\nEnter your birth year: ");scanf("%d",&z);
+                                system("cls");
+                            }while(z>0 && z<=2023); p->atm.year=z; marker=1;
+                        }break;
                 case 4: printf("\nInput new Contact Number: ");scanf("%d", &p->atm.contactNumber);break;
                 case 5: printf("\n%s's account is successfully updated.", p->atm.accountName);system("pause");break;
                 default: printf("\nSelect 1-6 only\n");system("pause");
@@ -196,17 +239,6 @@ void deleteAccount(char n[31]){
            q->next=p->next;
         }free(p);printf("%s's account is successfully deleted.\n",n);system("pause");
     }
-}
-
-int menu(){
-    int UserNum;
-    printf("Choose Module: \n");
-    printf("[1] ACCOUNT\n");
-    printf("[2] TRANSACTION MODULE\n");
-    printf("[3] EXIT\n");
-    printf("\nEnter your choice 1-3: ");
-    scanf("%d", &UserNum);
-    return UserNum;
 }
 int otherTransactionMenu(){
     REC other;
@@ -251,13 +283,21 @@ int transactionMenu(){
 
 int main(){
     REC bdo;
-    insertcard();
-    USER();
+    srand(time(NULL)); //to prevent same account numbers
     makenull();
+    insertcard();
+    if(isUSER()==1){
+        regMode(bdo);
+        addNewATMaccount(bdo);
+        printf("\nRegistration Successfull\nCongratulations %s! Welcome to Bank Rupt.\n", bdo.accountName);system("pause");
+    }else{
+        pin();
+        checkPin(bdo.pinCode);
+    }
     while(1){
         system ("cls");
         switch(menu()){
-            case 1: system("cls"); regMode(); break;
+            case 1: system("cls"); /*regMode();*/ break;
             case 2: system("cls"); printf("TRANSACTION MODULE\n\n");
                     while(1){
                         switch(transactionMenu()){
