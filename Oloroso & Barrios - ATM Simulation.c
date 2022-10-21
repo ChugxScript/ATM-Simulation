@@ -18,7 +18,7 @@ Mga Problema/Kulang:
 3. Yung display ng birthday (tsaka yung sa update na birthday rin ata)
 4. Contact No., need ata natin ma-ensure rito na 09-keme-keme ilalagay niya o wag na(??)
 5. Pin Code sa regMode (dapat naka-char)
-6. Palitan siguro yung initialDeposit na name tas gawing balance (suggestion lang, nakakalito kase)
+6. Palitan siguro yung initialDeposit na name tas gawing balance (suggestion lang, nakakalito kase) [goods na to fre]
 7. Pagchecheck ng Pin Code (char kse eh so need ata natin i-compare every char)
 8. Fund Transfer, di ko alam paano to gagawin
 9. Yung decrypt (san banda to nakalagay)
@@ -26,6 +26,7 @@ Mga Problema/Kulang:
 11. Yung "Wrong Pin Code" sa Existing User na lumalabas pag hiningi yung pin
 12. Yung sa update tas delete account pre, di na need yung name kasi bakit mo naman idedelete/i-uupdate account ng iba HAHAHA
     siguro tanong nalang yung pin, tas pag tama, g na yon.
+13. pag pindot ko ng enter sa pincode nadadagdagan ng isang number
 
 Addtl kineme:
 Yung #11 ayusin ko na rin sana ngayon kaso inaantok nako HAHAHA.
@@ -38,8 +39,8 @@ typedef struct details{
     char accountName[31];
     int accountNumber;
     int month,day,year;
-    int contactNumber;
-    int initialDeposit;
+    char contactNumber[12];
+    int balance;
     char pinCode[7];
 }REC;
 typedef struct node{
@@ -53,73 +54,110 @@ void makenull(){
     L=NULL;
 }
 
-void insertcard(){
+int insertcard(){
     FILE *fp;
     do{
         system("cls");
         printf("Please insert card...");
-        fp=fopen("F:\pakanangpakshet.txt","r+");
+        fp=fopen("D:\\Database.txt","w"); //in computer
+        fp=fopen("F:\\Database.txt","w"); //in flashdrive
     }while(fp==NULL);
     fclose(fp);
-    printf("\nCard inserted successfully.\n"); system("pause");
+
+    fp=fopen("F:\\ATM.txt","r");
+    if(fp==NULL){
+        printf("\nNOT YET REGISTERED\n"); system("pause");
+        system("cls"); return 1;
+    }else{
+        printf("\nWELCOME\n");system("pause");
+        system("cls"); return 2;
+    }
+    fclose(fp);
 }
 
-int isUSER(){
-    int x;
-    printf("\nAre you a NEW or EXISTING user?\n");
-    printf("Press [1] if NEW [2] if EXISTING\n"); scanf("%d", &x);
-    return x;
+void retrieve(){
+    FILE *fp;
+    REC z;
+    fp=fopen("F:\\Database.txt","r+");
+    if(fp==NULL){
+        printf("File not found.\n");
+        system("pause");
+    }else{
+        while(!feof(fp)){
+            fscanf(fp,"%d %[ ^\t]s %d %[ ^\t]s",&z.accountNumber, z.accountName, &z.balance, z.pinCode);
+        }
+    }fclose(fp);
 }
 
-void birthDayy(REC sm){
-    int x,y,z;
+void birthDayy(REC *bday){
     printf("\nBirthday (MM/DD/YYYY)\n");
     a:
     printf("\nIf your birth month is January, enter 01");
-    printf("\nEnter your birth month: ");scanf("%d",&x);
-    if(x<=0 || x>12){
+    printf("\nEnter your birth month: ");scanf("%d",&bday->month);
+    if(bday->month<=0 || bday->month>12){
         printf("\nInvalid Month.");system("pause");
         goto a;
-    }else{
-        sm.month=x;
     }
     b:
-    printf("\nEnter your birth day: ");scanf("%d",&y);
-    if(y<=0 || y>31){
+    printf("\nEnter your birth day: ");scanf("%d",&bday->day);
+    if(bday->day<=0 || bday->day>31){
         printf("\nInvalid Day.");system("pause");
         goto b;
-    }else{
-        sm.day=y;
     }
     c:
-    printf("\nEnter your birth year: ");scanf("%d",&z);
-    if(z<=0 || z>2023){
+    printf("\nEnter your birth year: ");scanf("%d",&bday->year);
+    if(bday->year<=0 || bday->year>2022){
         printf("\nInvalid Year.");system("pause");
         goto c;
-    }else{
-        sm.year=z;
     }
 }
 
-void regMode(REC bpi){
+void regMode(){
+    REC bpi;
     char ch;
-    int marker=0;
-    int index=0;
+    int index=2;
+    bpi.contactNumber[0]='0'; bpi.contactNumber[1]='9';
     bpi.accountNumber = rand() % 99999 + 10000; //10k para sure na 5 digits
     system("cls");
     printf("REGISTRATION MODULE\n");
     printf("Please fill out the following informations: \n\n");
     printf("\nAccount Number: %d",bpi.accountNumber);
     printf("\nAccount Name: ");scanf(" %[^\n]s",bpi.accountName);
-    birthDayy(bpi);
+    birthDayy(&bpi);system("cls");
+    printf("REGISTRATION MODULE\n");
+    printf("Please fill out the following informations: \n\n");
+    printf("\nAccount Number: %d",bpi.accountNumber);
+    printf("\nAccount Name: %s",bpi.accountName);
     printf("\nBirthdate (MM/DD/YYYY): %d / %d / %d",bpi.month,bpi.day,bpi.year);
-    printf("\nContact Number: ");scanf("%d", &bpi.accountNumber);
+    printf("\nContact Number: 09");
+
+    while((ch=getch())!=13 && index<10){
+        if (index<0){
+            index=0;
+        }
+        if(ch==8){
+            putch('\b'); putch(' ');
+            putch('\b'); index--;
+            continue;
+        }
+        if(isdigit(ch)){
+         bpi.contactNumber[index++]=ch;
+         putch('*');
+        }
+    }
+    if (index==10){
+        bpi.contactNumber[index++]=ch;
+        putchar('*');
+    }bpi.contactNumber[index]='\0';
+    printf("\nContact Number: %s",bpi.contactNumber);
+
     do{
-        printf("\nInitial Deposit (Min. 5,000): ");scanf("%d", &bpi.initialDeposit);
-        if(bpi.initialDeposit<5000)
+        printf("\nInitial Deposit (Min. 5,000): ");scanf("%d", &bpi.balance);
+        if(bpi.balance<5000)
             printf("Minimum deposit is 5000 petot, betch.\n");
-    }while(bpi.initialDeposit<5000);
-    printf("\nPIN Code: ");scanf("%d",&bpi.pinCode);  //gagawin 'tong ano tulad dun sa isa na char, pre
+    }while(bpi.balance<5000);
+    //printf("\nPIN Code: ");scanf("%d",&bpi.pinCode);  //gagawin 'tong ano tulad dun sa isa na char, pre
+    pin(&bpi); printf("\nPIN Code: %s\n\n", bpi.pinCode);system("pause");
 }
 
 void addNewATMaccount(REC x){
@@ -138,12 +176,11 @@ void addNewATMaccount(REC x){
     }temp->next = p;
 }
 
-void pin(){
-    REC x;
+void pin(REC *x){
     int index=0;
     int y=0,z=0;
     char ch;
-    printf("Enter PIN: ");
+    printf("\nPIN Code: ");
     while((ch=getch())!=13 && index<5){
         if (index<0){
             index=0;
@@ -154,25 +191,25 @@ void pin(){
             continue;
         }
         if(isdigit(ch)){
-         x.pinCode[index++]=ch;
+         x->pinCode[index++]=ch;
          putchar('*');
         }
     }
     if (index==5){
-        x.pinCode[index++]=ch;
+        x->pinCode[index++]=ch;
         putchar('*');
-    }x.pinCode[index]='\0';
-    printf("\n\nPin Code = %s\n",x.pinCode); system("pause");
+    }x->pinCode[index]='\0';
+    /*printf("\n\nPin Code = %s\n",x.pinCode); system("pause");
 
-    while(x.pinCode[y]!='\0'){
-        x.pinCode[y]=x.pinCode[y] + 70;
+    while(x->pinCode[y]!='\0'){
+        x->pinCode[y]=x->pinCode[y] + 70;
         y++;
-    }printf("\n\nEncrypted Pin Code = %s\n",x.pinCode); system("pause");
+    }printf("\n\nEncrypted Pin Code = %s\n",x->pinCode); system("pause");
 
-    while(x.pinCode[z]!='\0'){
-        x.pinCode[z]=x.pinCode[z] - 70;
+    while(x->pinCode[z]!='\0'){
+        x->pinCode[z]=x->pinCode[z] - 70;
         z++;
-    }printf("\nDecrypted Pin Code = %s\n",x.pinCode); system("pause");
+    }printf("\nDecrypted Pin Code = %s\n",x->pinCode); system("pause");*/
 }
 
 void save(){
@@ -210,12 +247,41 @@ int menu(){
     int UserNum;
     system("cls");
     printf("Choose Module: \n");
-    printf("[1] ACCOUNT\n");
+    printf("[1] ACCOUNT SETTINGS\n");
     printf("[2] TRANSACTION MODULE\n");
     printf("[3] EXIT\n");
     printf("\nEnter your choice 1-3: ");
     scanf("%d", &UserNum);
     return UserNum;
+}
+int AccountMenu(){
+    system("cls");
+    REC other;
+    int UserNum;
+    printf("Choose account option: \n");
+    printf("[1] Update Account\n");
+    printf("[2] Delete Account\n");
+    printf("[3] Back\n");
+    printf("\nEnter your choice 1-3: ");
+    scanf("%d", &UserNum);
+    return UserNum;
+    //lalagay siguro rito ng function na checker sa pincode tapos isang tanungan nalang or bago mag Account Menu?
+}
+int transactionMenu(){
+    int UserNum;
+    while(1){
+    system("cls");
+    printf("Choose Transaction: \n");
+    printf("[1] Balance Inquiry\n");
+    printf("[2] Withdraw\n");
+    printf("[3] Deposit\n");
+    printf("[4] Fund Transfer\n");
+    printf("[5] Other Transactions\n");
+    printf("[6] Back\n");
+    printf("\nEnter your choice 1-6: ");
+    scanf("%d", &UserNum);
+    return UserNum;
+    }
 }
 
 void updateAccount(char n[31]){
@@ -303,58 +369,17 @@ void deleteAccount(char n[31]){
         }
     }
 }
-int AccountMenu(){
-    system("cls");
-    REC other;
-    int UserNum;
-    printf("Choose account option: \n");
-    printf("[1] Update Account\n");
-    printf("[2] Delete Account\n");
-    printf("[3] Back\n");
-    printf("\nEnter your choice 1-3: ");
-    scanf("%d", &UserNum);
-    //lalagay siguro rito ng function na checker sa pincode tapos isang tanungan nalang or bago mag Account Menu?
-    switch(UserNum){
-        case 1: system("cls");
-                printf("Input Account Name to be updated: ");scanf(" %[^\n]s",other.accountName);
-                updateAccount(other.accountName);break;
-        case 2: system("cls");
-                printf("Input Account Name to be deleted: ");scanf(" %[^\n]s",other.accountName);
-                deleteAccount(other.accountName);break;
-        case 3: menu();system("cls");break;
-        default:system("cls");break;
-    }
-}
-int transactionMenu(){
-    int UserNum;
-    while(1){
-    system("cls");
-    printf("Choose Transaction: \n");
-    printf("[1] Balance Inquiry\n");
-    printf("[2] Withdraw\n");
-    printf("[3] Deposit\n");
-    printf("[4] Fund Transfer\n");
-    printf("[5] Other Transactions\n");
-    printf("[6] Back\n");
-    printf("\nEnter your choice 1-6: ");
-    scanf("%d", &UserNum);
-    return UserNum;
-    }
-}
 
 int main(){
     int withdraw,deposit;
     REC bdo;
     srand(time(NULL));
     makenull();
-    insertcard();
-    if(isUSER()==1){
-        regMode(bdo);
-        addNewATMaccount(bdo);
-        printf("\nRegistration successful! Thank you for choosing Bank Rupt, Mr/Ms. %s.\n", bdo.accountName);system("pause");
-    }else{
-        pin();
-        checkPin(bdo.pinCode);
+    switch(insertcard()){
+        case 1: retrieve();
+                regMode();
+                printf("\n");
+        case 2: printf("\n");
     }
     while(1){
         system ("cls");
@@ -362,33 +387,39 @@ int main(){
             case 1: system("cls"); printf("ACCOUNT SETTINGS\n\n");
                     while(1){
                         switch(AccountMenu()){
-                            case 1: break;
-                            default: break;
+                            case 1: system("cls");
+                                    printf("Input Account Name to be updated: ");scanf(" %[^\n]s",bdo.accountName);
+                                    updateAccount(bdo.accountName);break;
+                            case 2: system("cls");
+                                    printf("Input Account Name to be deleted: ");scanf(" %[^\n]s",bdo.accountName);
+                                    deleteAccount(bdo.accountName);break;
+                            case 3: break;
+                            default: printf("\nEnter 1-3 only.");system("pause");
                         }
                     }break;
             case 2: system("cls"); printf("TRANSACTION MODULE\n\n");
                     while(1){
                         switch(transactionMenu()){
                             case 1:printf("BALANCE INQUIRY\n");
-                                   printf("Current Balance: %d", bdo.initialDeposit);system("pause");break;
+                                   printf("Current Balance: %d", bdo.balance);system("pause");break;
                             case 2:printf("WITHDRAW MONEY\n");
                                    do{
                                    printf("Please input amount to withdraw: ");scanf("%d",&withdraw);
-                                   if(withdraw>(bdo.initialDeposit))
+                                   if(withdraw>(bdo.balance))
                                         printf("\nInsufficient Balance.");
-                                   }while(withdraw>(bdo.initialDeposit));
-                                   bdo.initialDeposit-=withdraw;
+                                   }while(withdraw>(bdo.balance));
+                                   bdo.balance-=withdraw;
                                    printf("\n\nWithdraw successful.");
-                                   printf("\nYour new balance: %d", bdo.initialDeposit);system("pause");break;
+                                   printf("\nYour new balance: %d", bdo.balance);system("pause");break;
                             case 3:printf("DEPOSIT MONEY\n");
                                    do{
                                    printf("Please input amount to deposit: ");scanf("%d",&deposit);
                                    if(deposit==0)
                                         printf("\nMinimum deposit amount is 1.");
                                    }while(deposit!=0);
-                                   bdo.initialDeposit+=deposit;
+                                   bdo.balance+=deposit;
                                    printf("\n\nDeposit successful.");
-                                   printf("\nYour new balance: %d",bdo.initialDeposit);system("pause");break;
+                                   printf("\nYour new balance: %d",bdo.balance);system("pause");break;
                             case 4:printf("FUND TRANSFER");system("pause");break;                   //di ko alam pano to gagawin
                             case 5:printf("PAY UTILITY BILLS");
                                    int Meralco,Maynilad;
@@ -404,8 +435,8 @@ int main(){
                                         printf("[2]Back\n");
                                         scanf("%d", userNum);
                                         switch(userNum){
-                                            case 1: if(bdo.initialDeposit>(Maynilad+Meralco)){
-                                                        bdo.initialDeposit-(Maynilad+Meralco);
+                                            case 1: if(bdo.balance>(Maynilad+Meralco)){
+                                                        bdo.balance-(Maynilad+Meralco);
                                                         printf("\nPayment successful.");
                                                     }else
                                                         printf("\nInsufficient Balance.");
