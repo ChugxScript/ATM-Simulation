@@ -112,52 +112,90 @@ void birthDayy(REC *bday){
     }
 }
 
-void regMode(){
-    REC bpi;
-    char ch;
-    int index=2;
-    bpi.contactNumber[0]='0'; bpi.contactNumber[1]='9';
-    bpi.accountNumber = rand() % 99999 + 10000; //10k para sure na 5 digits
-    system("cls");
-    printf("REGISTRATION MODULE\n");
-    printf("Please fill out the following informations: \n\n");
-    printf("\nAccount Number: %d",bpi.accountNumber);
-    printf("\nAccount Name: ");scanf(" %[^\n]s",bpi.accountName);
-    birthDayy(&bpi);system("cls");
-    printf("REGISTRATION MODULE\n");
-    printf("Please fill out the following informations: \n\n");
-    printf("\nAccount Number: %d",bpi.accountNumber);
-    printf("\nAccount Name: %s",bpi.accountName);
-    printf("\nBirthdate (MM/DD/YYYY): %d / %d / %d",bpi.month,bpi.day,bpi.year);
-    printf("\nContact Number: 09");
-
-    while((ch=getch())!=13 && index<10){
-        if (index<0){
-            index=0;
-        }
-        if(ch==8){
-            putch('\b'); putch(' ');
-            putch('\b'); index--;
-            continue;
-        }
-        if(isdigit(ch)){
-         bpi.contactNumber[index++]=ch;
-         putch('*');
-        }
+int checkPin(char n[7]){
+    LIST *p, *q;
+    p=q=L;
+    while(p!=NULL && strcmp (n, p->atm.pinCode)!=0){
+        q=p;
+        p=p->next;
     }
-    if (index==10){
-        bpi.contactNumber[index++]=ch;
-        putchar('*');
-    }bpi.contactNumber[index]='\0';
-    printf("\nContact Number: %s",bpi.contactNumber);
+    if (p==NULL){
+        printf("\nWrong PIN Code\n");system("pause");
+        return 1;
+    }else{
+        printf("\nPIN verified.");system("pause");
+        return 2;
+    }
+}
 
-    do{
-        printf("\nInitial Deposit (Min. 5,000): ");scanf("%d", &bpi.balance);
-        if(bpi.balance<5000)
-            printf("Minimum deposit is 5000 petot, betch.\n");
-    }while(bpi.balance<5000);
-    //printf("\nPIN Code: ");scanf("%d",&bpi.pinCode);  //gagawin 'tong ano tulad dun sa isa na char, pre
-    pin(&bpi); printf("\nPIN Code: %s\n\n", bpi.pinCode);system("pause");
+void pin(REC *x, int a){
+    int index=0;
+    int y=0,z=0;
+    char ch;
+    if(a==1){
+        b:
+        printf("\nPIN Code: ");
+        while((ch=getch())!=13 && index<5){
+            if (index<0){
+                index=0;
+            }
+            if(ch==8){
+                putch('\b'); putch(' ');
+                putch('\b'); index--;
+                continue;
+            }
+            if(isdigit(ch)){
+                x->pinCode[index++]=ch;
+                putchar('*');
+            }
+        }
+        if (index==5){
+            x->pinCode[index++]=ch;
+            putchar('*');
+        }x->pinCode[index]='\0';
+        if(strlen(x->pinCode)<4){
+            index=0;
+            goto b;
+        }
+    }else{
+        do{
+            c:
+            system ("cls");
+            printf("\nPIN Code: ");
+            while((ch=getch())!=13 && index<5){
+                if (index<0){
+                    index=0;
+                }
+                if(ch==8){
+                    putch('\b'); putch(' ');
+                    putch('\b'); index--;
+                    continue;
+                }
+                if(isdigit(ch)){
+                 x->pinCode[index++]=ch;
+                 putchar('*');
+                }
+            }
+            if (index==5){
+                x->pinCode[index++]=ch;
+                putchar('*');
+            }x->pinCode[index]='\0';
+            if(strlen(x->pinCode)<4)
+                goto c;
+        }while(checkPin(x->pinCode)==1);
+    }
+
+    /*printf("\n\nPin Code = %s\n",x.pinCode); system("pause");
+
+    while(x->pinCode[y]!='\0'){
+        x->pinCode[y]=x->pinCode[y] + 70;
+        y++;
+    }printf("\n\nEncrypted Pin Code = %s\n",x->pinCode); system("pause");
+
+    while(x->pinCode[z]!='\0'){
+        x->pinCode[z]=x->pinCode[z] - 70;
+        z++;
+    }printf("\nDecrypted Pin Code = %s\n",x->pinCode); system("pause");*/
 }
 
 void addNewATMaccount(REC x){
@@ -176,12 +214,26 @@ void addNewATMaccount(REC x){
     }temp->next = p;
 }
 
-void pin(REC *x){
-    int index=0;
-    int y=0,z=0;
+void regMode(){
+    REC bpi;
     char ch;
-    printf("\nPIN Code: ");
-    while((ch=getch())!=13 && index<5){
+    int index=2;
+    bpi.contactNumber[0]='0'; bpi.contactNumber[1]='9';
+    bpi.accountNumber = rand() % 99999 + 10000; //10k para sure na 5 digits
+    system("cls");
+    printf("REGISTRATION MODULE\n");
+    printf("Please fill out the following informations: \n\n");
+    printf("\nAccount Number: %d",bpi.accountNumber);
+    printf("\nAccount Name: ");scanf(" %[^\n]s",bpi.accountName);
+    birthDayy(&bpi);system("cls");
+    printf("REGISTRATION MODULE\n");
+    printf("Please fill out the following informations: \n\n");
+    printf("\nAccount Number: %d",bpi.accountNumber);
+    printf("\nAccount Name: %s",bpi.accountName);
+    printf("\nBirthdate (MM/DD/YYYY): %d / %d / %d",bpi.month,bpi.day,bpi.year);
+    printf("\nContact Number: 09");
+    a:
+    while((ch=getch())!=13 && index<10){
         if (index<0){
             index=0;
         }
@@ -191,55 +243,53 @@ void pin(REC *x){
             continue;
         }
         if(isdigit(ch)){
-         x->pinCode[index++]=ch;
-         putchar('*');
+         bpi.contactNumber[index++]=ch;
+         putch('*');
         }
     }
-    if (index==5){
-        x->pinCode[index++]=ch;
+    if (index==10){
+        bpi.contactNumber[index++]=ch;
         putchar('*');
-    }x->pinCode[index]='\0';
-    /*printf("\n\nPin Code = %s\n",x.pinCode); system("pause");
+    }bpi.contactNumber[index]='\0';
+    if(strlen(bpi.contactNumber)<11)
+        goto a;
+    printf("\nContact Number: %s",bpi.contactNumber);
 
-    while(x->pinCode[y]!='\0'){
-        x->pinCode[y]=x->pinCode[y] + 70;
-        y++;
-    }printf("\n\nEncrypted Pin Code = %s\n",x->pinCode); system("pause");
-
-    while(x->pinCode[z]!='\0'){
-        x->pinCode[z]=x->pinCode[z] - 70;
-        z++;
-    }printf("\nDecrypted Pin Code = %s\n",x->pinCode); system("pause");*/
+    do{
+        printf("\nInitial Deposit (Min. 5,000): ");scanf("%d", &bpi.balance);
+        if(bpi.balance<5000)
+            printf("Minimum deposit is 5000 petot, betch.\n");
+    }while(bpi.balance<5000);
+    pin(&bpi,1); printf("\nPIN Code: %s\n\n", bpi.pinCode);system("pause");
+    addNewATMaccount(bpi);
 }
 
 void save(){
-/*
     FILE *fp;
-    int i;
-    fp = fopen("E:\pakanangpakshet.txt","w+");
+    LIST *p; p=L;
+    fp = fopen("D:\\Database.txt","w+"); //save to computer
     if (fp==NULL){
         printf("Error 404. File not found.\n");
         system("pause");
     }
     else {
-        for (i=0;i<=;i++)
-            fprintf(" ");
-        fclose(fp);
-      }
-*/
-}
-
-void checkPin(char n[31]){
-    LIST *p, *q;
-    p=q=L;
-    while(p!=NULL && strcmp (n, p->atm.pinCode)!=0){
-        q=p;
+        while(p!=NULL){
+        fprintf(fp,"%d \t%s \t%d \t%s \t%d %d %d \t%s",
+                p->atm.accountNumber,p->atm.accountName,p->atm.balance,p->atm.pinCode,p->atm.month,p->atm.day,p->atm.year,p->atm.contactNumber);
         p=p->next;
-    }
-    if (p==NULL){
-        printf("\nWrong PIN Code\n");system("pause");
-    }else{
-        printf("\nPIN verified.");system("pause");
+        }fclose(fp);
+
+        fp = fopen("D:\\ATM.txt","w+"); //save to computer
+        fp = fopen("F:\\ATM.txt","w+"); //save to flashdrive
+        if (fp==NULL){
+            printf("Error 404. File not found.\n");
+            system("pause");
+        } else {
+            while(p!=NULL){
+            fprintf(fp,"%d \t%s \t%d \t%s",p->atm.accountNumber,p->atm.accountName,p->atm.balance,p->atm.pinCode);
+            p=p->next;
+          }fclose(fp);
+        }
     }
 }
 
@@ -378,9 +428,12 @@ int main(){
     switch(insertcard()){
         case 1: retrieve();
                 regMode();
+                printf("\nREGISTRATION SUCCESSFULLY\n"); system("pause");
+                break;
+        case 2: pin(&bdo,2);
                 printf("\n");
-        case 2: printf("\n");
     }
+
     while(1){
         system ("cls");
         switch(menu()){
