@@ -13,26 +13,14 @@ by Andrew R. Oloroso and Armand Angelo C. Barrios*/
 /*
 READ THIS SHITTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT BROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!
 Mga Problema/Kulang:
-1. Retrieve(); (ewan ko pano to)
-2. Save();     (eto rin, ewan ko kung pano to)
-3. Yung display ng birthday (tsaka yung sa update na birthday rin ata)
-4. Contact No., need ata natin ma-ensure rito na 09-keme-keme ilalagay niya o wag na(??)
-5. Pin Code sa regMode (dapat naka-char)
-6. Palitan siguro yung initialDeposit na name tas gawing balance (suggestion lang, nakakalito kase) [goods na to fre]
-7. Pagchecheck ng Pin Code (char kse eh so need ata natin i-compare every char)
-8. Fund Transfer, di ko alam paano to gagawin
-9. Yung decrypt (san banda to nakalagay)
-10. Encrypt (san din to nakalagay)
-11. Yung "Wrong Pin Code" sa Existing User na lumalabas pag hiningi yung pin
-12. Yung sa update tas delete account pre, di na need yung name kasi bakit mo naman idedelete/i-uupdate account ng iba HAHAHA
+1. Yung display ng birthday sa update
+2. Fund Transfer, di ko alam paano to gagawin
+3. Yung decrypt (san banda to nakalagay)
+4. Encrypt (san din to nakalagay)
+5. Yung sa update tas delete account pre, di na need yung name kasi bakit mo naman idedelete/i-uupdate account ng iba HAHAHA
     siguro tanong nalang yung pin, tas pag tama, g na yon.
-13. pag pindot ko ng enter sa pincode nadadagdagan ng isang number
-
-Addtl kineme:
-Yung #11 ayusin ko na rin sana ngayon kaso inaantok nako HAHAHA.
-Di ko pa masyado na-rurun and nachecheck yung mga nalagay ko so baka may mga bagong problems pa dyan HAHAHA. Check mo nalang kung trip mo.
-delete mo nalang siguro yung mga keme na comments ko except dun sa listahan ng mga problema/kulang
-Tulog pa ata ako habang binabasa mo to. HAHAHA.
+6. pag pindot ko ng enter sa pincode nadadagdagan ng isang ' * '
+7. Account number kailangan unique or kailangan icompare yung acc number sa database
 */
 
 typedef struct details{
@@ -219,56 +207,6 @@ void pin(REC *x, int a){
     }printf("\nDecrypted Pin Code = %s\n",x->pinCode); system("pause");*/
 }
 
-void regMode(){
-    REC bpi;
-    char ch;
-    int index=2;
-    bpi.contactNumber[0]='0'; bpi.contactNumber[1]='9';
-    bpi.accountNumber = rand() % 99999 + 10000; //10k para sure na 5 digits
-    system("cls");
-    printf("REGISTRATION MODULE\n");
-    printf("Please fill out the following informations: \n\n");
-    printf("\nAccount Number: %d",bpi.accountNumber);
-    printf("\nAccount Name: ");scanf(" %[^\n]s",bpi.accountName);
-    birthDayy(&bpi);system("cls");
-    printf("REGISTRATION MODULE\n");
-    printf("Please fill out the following informations: \n\n");
-    printf("\nAccount Number: %d",bpi.accountNumber);
-    printf("\nAccount Name: %s",bpi.accountName);
-    printf("\nBirthdate (MM/DD/YYYY): %d / %d / %d",bpi.month,bpi.day,bpi.year);
-    printf("\nContact Number: 09");
-    a:
-    while((ch=getch())!=13 && index<10){
-        if (index<0){
-            index=0;
-        }
-        if(ch==8){
-            putch('\b'); putch(' ');
-            putch('\b'); index--;
-            continue;
-        }
-        if(isdigit(ch)){
-         bpi.contactNumber[index++]=ch;
-         putch('*');
-        }
-    }
-    if (index==10){
-        bpi.contactNumber[index++]=ch;
-        putchar('*');
-    }bpi.contactNumber[index]='\0';
-    if(strlen(bpi.contactNumber)<11)
-        goto a;
-    printf("\nContact Number: %s",bpi.contactNumber);
-
-    do{
-        printf("\nInitial Deposit (Min. 5,000): ");scanf("%d", &bpi.balance);
-        if(bpi.balance<5000)
-            printf("Minimum deposit is 5000 petot, betch.\n");
-    }while(bpi.balance<5000);
-    pin(&bpi,1); printf("\nPIN Code: %s\n\n", bpi.pinCode);system("pause");
-    addNewATMaccount(bpi);
-}
-
 void save(){
     FILE *fp;
     LIST *p; p=L;
@@ -438,8 +376,7 @@ int main(){
     srand(time(NULL));
     makenull();
     switch(insertcard()){
-        case 1: //regMode();
-                bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
+        case 1: bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
                 bdo.accountNumber = rand() % 99999 + 10000; //10k para sure na 5 digits
                 system("cls");
                 printf("REGISTRATION MODULE\n");
