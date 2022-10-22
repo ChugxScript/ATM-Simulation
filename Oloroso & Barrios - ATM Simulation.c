@@ -57,7 +57,6 @@ int insertcard(){
     do{
         system("cls");
         printf("Please insert card...");
-        fp=fopen("D:\\Database.txt","w"); //in computer
         fp=fopen("F:\\Check.txt","w"); //in flashdrive
     }while(fp==NULL);
     fclose(fp);
@@ -99,11 +98,11 @@ void retrieve(){
     }else{
         while(!feof(fp)){
             fscanf(fp,"%d",&z.accountNumber);
-            fscanf(fp," %[ ^\t]s", z.accountName);
+            fscanf(fp," %[^\t]s", z.accountName);
             fscanf(fp,"%d", &z.balance);
-            fscanf(fp," %[ ^\t]s", z.pinCode);
+            fscanf(fp," %[^\t]s", z.pinCode);
             fscanf(fp,"%d %d %d", &z.month, &z.day, &z.year);
-            fscanf(fp," %[ ^\n]s", z.contactNumber);
+            fscanf(fp," %[^\n]s", z.contactNumber);
             addNewATMaccount(z);
         }fclose(fp);
     }
@@ -126,7 +125,7 @@ void birthDayy(REC *bday){
     }
     c:
     printf("\nEnter your birth year: ");scanf("%d",&bday->year);
-    if(bday->year<=0 || bday->year>2022){
+    if(bday->year<=1900 || bday->year>2022){
         printf("\nInvalid Year.");system("pause");
         goto c;
     }
@@ -280,8 +279,9 @@ void save(){
     }
     else {
         while(p!=NULL){
-        fprintf(fp,"%d %s\t%d %s\t%d %d %d %s\n",
+        fprintf(fp,"%d\t%s\t%d\t%s\t%d %d %d\t%s",
                 p->atm.accountNumber,p->atm.accountName,p->atm.balance,p->atm.pinCode,p->atm.month,p->atm.day,p->atm.year,p->atm.contactNumber);
+        fprintf(fp,"\n");
         p=p->next;
         }fclose(fp);
     }
@@ -431,18 +431,64 @@ void deleteAccount(char n[31]){
 
 int main(){
     int withdraw,deposit;
+    char ch;
+    int index=2;
     LIST *p;p=L;
     REC bdo;
     srand(time(NULL));
     makenull();
     switch(insertcard()){
-        case 1: regMode();
+        case 1: //regMode();
+                bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
+                bdo.accountNumber = rand() % 99999 + 10000; //10k para sure na 5 digits
+                system("cls");
+                printf("REGISTRATION MODULE\n");
+                printf("Please fill out the following informations: \n\n");
+                printf("\nAccount Number: %d",bdo.accountNumber);
+                printf("\nAccount Name: ");scanf(" %[^\n]s",bdo.accountName);
+                birthDayy(&bdo);system("cls");
+                printf("REGISTRATION MODULE\n");
+                printf("Please fill out the following informations: \n\n");
+                printf("\nAccount Number: %d",bdo.accountNumber);
+                printf("\nAccount Name: %s",bdo.accountName);
+                printf("\nBirthdate (MM/DD/YYYY): %d / %d / %d",bdo.month,bdo.day,bdo.year);
+                printf("\nContact Number: 09");
+                a:
+                while((ch=getch())!=13 && index<10){
+                    if (index<0){
+                        index=0;
+                    }
+                    if(ch==8){
+                        putch('\b'); putch(' ');
+                        putch('\b'); index--;
+                        continue;
+                    }
+                    if(isdigit(ch)){
+                     bdo.contactNumber[index++]=ch;
+                     putch('*');
+                    }
+                }
+                if (index==10){
+                    bdo.contactNumber[index++]=ch;
+                    putchar('*');
+                }bdo.contactNumber[index]='\0';
+                if(strlen(bdo.contactNumber)<11)
+                    goto a;
+                printf("\nContact Number: %s",bdo.contactNumber);
+
+                do{
+                    printf("\nInitial Deposit (Min. 5,000): ");scanf("%d", &bdo.balance);
+                    if(bdo.balance<5000)
+                        printf("Minimum deposit is 5000 petot, betch.\n");
+                }while(bdo.balance<5000);
+                pin(&bdo,1); printf("\nPIN Code: %s\n\n", bdo.pinCode);system("pause");
+                addNewATMaccount(bdo);
                 printf("\nREGISTRATION SUCCESSFULLY\n"); system("pause");
                 break;
         case 2: retrieve();
-                printf("\nbdo=%s,   atm=%s",bdo.pinCode,p->atm.pinCode);system("pause");
                 pin(&bdo,2);
                 printf("\n");
+                break;
     }
 
     while(1){
