@@ -7,8 +7,7 @@ by Andrew R. Oloroso and Armand Angelo C. Barrios*/
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
-
-//tinanggal ko muna yung mga comments sa codes dati para makita mo yung mga kemeru, balik nalang siguro pag tapos na natin
+#include <windows.h>
 
 /*
 READ THIS SHITTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT BROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!
@@ -21,6 +20,9 @@ Mga Problema/Kulang:
     siguro tanong nalang yung pin, tas pag tama, g na yon.
 6. pag pindot ko ng enter sa pincode nadadagdagan ng isang ' * '
 7. Account number kailangan unique or kailangan icompare yung acc number sa database
+
+Not priority pero magandang idagdag pag tapos na program
+Pwede gawing pulldown keme yung birthday
 */
 
 typedef struct details{
@@ -45,11 +47,11 @@ int insertcard(){
     do{
         system("cls");
         printf("Please insert card...");
-        fp=fopen("F:\\Check.txt","w"); //in flashdrive
+        fp=fopen("E:\\Check.txt","w"); //in flashdrive
     }while(fp==NULL);
     fclose(fp);
 
-    fp=fopen("F:\\ATM.txt","r");
+    fp=fopen("E:\\ATM.txt","r");
     if(fp==NULL){
         printf("\nNOT YET REGISTERED\n"); system("pause");
         system("cls"); return 1;
@@ -227,7 +229,7 @@ void save(){
 void saveFD(){
     FILE *fp;
     LIST *p; p=L;
-    fp = fopen("F:\\ATM.txt","w");
+    fp = fopen("E:\\ATM.txt","w");
     if (fp==NULL){
         printf("Error 404. File not found.\n");
         system("pause");
@@ -281,12 +283,12 @@ int transactionMenu(){
     }
 }
 
-void updateAccount(char n[31]){
+void updateAccount(){
     int marker=0;
     int x=0,y=0,z=0;
     LIST *p, *q;
     p=q=L;
-    while(p!=NULL && strcmp (n, p->atm.accountName)!=0){
+    while(p!=NULL){
         q=p;
         p=p->next;
     }
@@ -296,23 +298,20 @@ void updateAccount(char n[31]){
         while(x!=6){
             system("cls");
             printf("Updating Account: \n");
-            printf("\nAccount Number: %d",p->atm.accountNumber);
             printf("\nAccount Name: %s",p->atm.accountName);
             printf("\nBirthday: %d / %d / %d",p->atm.month,p->atm.day,p->atm.year);
             printf("\nContact Number: %d",p->atm.contactNumber);
             printf("\nPIN Code: %d",p->atm.pinCode);
             printf("\nUPDATE: \n");
-            printf("\n[1] Account Number");
-            printf("\n[2] Account Name");
-            printf("\n[3] Birthday");
-            printf("\n[4] Contact Number");
-            printf("\n[5] Change PIN Code");
-            printf("\n[6] Back");
+            printf("\n[1] Account Name");
+            printf("\n[2] Birthday");
+            printf("\n[3] Contact Number");
+            printf("\n[4] Change PIN Code");
+            printf("\n[5] Back");
             printf("\n\nEnter a Number: ");scanf("%d", &x);
             switch(x){
-                case 1: printf("\nInput new Account Number: ");scanf("%d", &p->atm.accountNumber);break;
-                case 2: printf("\nInput new Account Name: ");scanf("%d",p->atm.accountName);break;
-                case 3: while(marker!=1){
+                case 1: printf("\nInput new Account Name: ");scanf("%d",p->atm.accountName);break;
+                case 2: while(marker!=1){
                             printf("\nInput new Birthday (MM/DD/YYYY)\n");
                             do{
                                 printf("\nIf your birth month is January, enter 01");
@@ -326,25 +325,25 @@ void updateAccount(char n[31]){
                             do{
                                 printf("\nEnter your birth year: ");scanf("%d",&z);
                                 system("cls");
-                            }while(z>0 && z<=2023); p->atm.year=z; marker=1;
+                            }while(z>1900 && z<=2022); p->atm.year=z; marker=1;
                         }break;
-                case 4: printf("\nInput new Contact Number: ");scanf("%d", &p->atm.contactNumber);break;
-                case 5: printf("\nEnter Pin: ");
+                case 3: printf("\nInput new Contact Number: ");scanf("%d", &p->atm.contactNumber);break;
+                case 4: printf("\nEnter Pin: ");
                         scanf("%c",&p->atm.pinCode);
                         //checkPin(); kailangan i-compare to every lagay ng user
                         break;
-                case 6: printf("\n%s's account is successfully updated.", p->atm.accountName);system("pause");break;
-                default: printf("\nSelect 1-6 only\n");system("pause");
+                case 5: printf("\n%s's account was successfully updated.", p->atm.accountName);system("pause");break;
+                default: printf("\nSelect 1-5 only\n");system("pause");
             }
         }
    }
 }
 
-void deleteAccount(char n[31]){
+void deleteAccount(){
     int userChoice;
     LIST *p, *q;
     p=q=L;
-    while(p!=NULL && strcmp (n, p->atm.accountName)!=0){
+    while(p!=NULL){
         q=p;
         p=p->next;
     }
@@ -360,7 +359,7 @@ void deleteAccount(char n[31]){
             L=p->next;
             }else{
             q->next=p->next;
-            }free(p);printf("%s's account is successfully deleted.\n",n);system("pause");
+            }free(p);printf("The account was successfully deleted.\n");system("pause");
         }else{
             AccountMenu();
         }
@@ -409,14 +408,14 @@ int main(){
                     bdo.contactNumber[index++]=ch;
                     putchar('*');
                 }bdo.contactNumber[index]='\0';
-                if(strlen(bdo.contactNumber)<11)
+                if(strlen(bdo.contactNumber)!=11)
                     goto a;
                 printf("\nContact Number: %s",bdo.contactNumber);
 
                 do{
-                    printf("\nInitial Deposit (Min. 5,000): ");scanf("%d", &bdo.balance);
+                    printf("\nInitial Deposit (Min. 5,000): Php ");scanf("%d", &bdo.balance);
                     if(bdo.balance<5000)
-                        printf("Minimum deposit is 5000 petot, betch.\n");
+                        printf("Minimum deposit is Php 5000.\n");
                 }while(bdo.balance<5000);
                 pin(&bdo,1); printf("\nPIN Code: %s\n\n", bdo.pinCode);system("pause");
                 addNewATMaccount(bdo);
@@ -427,20 +426,19 @@ int main(){
                 printf("\n");
                 break;
     }
-
     while(1){
         system ("cls");
         switch(menu()){
-            case 1: system("cls"); printf("ACCOUNT SETTINGS\n\n");
+            case 1: printf("VERIFICATION WINDOW.\n");printf("Input Pin Code: ");
+                    //scanf("%c",bdo.pinCode);checkPin(bdo.pincode);
+                    system("cls"); printf("ACCOUNT SETTINGS\n\n");
                     while(1){
                         switch(AccountMenu()){
                             case 1: system("cls");
-                                    printf("Input Account Name to be updated: ");scanf(" %[^\n]s",bdo.accountName);
-                                    updateAccount(bdo.accountName);break;
+                                    updateAccount();break;
                             case 2: system("cls");
-                                    printf("Input Account Name to be deleted: ");scanf(" %[^\n]s",bdo.accountName);
-                                    deleteAccount(bdo.accountName);break;
-                            case 3: break;
+                                    deleteAccount();break;
+                            case 3: menu();break;
                             default: printf("\nEnter 1-3 only.");system("pause");
                         }
                     }break;
@@ -448,51 +446,52 @@ int main(){
                     while(1){
                         switch(transactionMenu()){
                             case 1:printf("BALANCE INQUIRY\n");
-                                   printf("Current Balance: %d", bdo.balance);system("pause");break;
+                                   printf("Current Balance: Php %d\n", bdo.balance);system("pause");break;
                             case 2:printf("WITHDRAW MONEY\n");
                                    do{
-                                   printf("Please input amount to withdraw: ");scanf("%d",&withdraw);
+                                   printf("Please input amount to withdraw: Php ");scanf("%d",&withdraw);
                                    if(withdraw>(bdo.balance))
-                                        printf("\nInsufficient Balance.");
+                                        printf("\nInsufficient Balance.\n");
                                    }while(withdraw>(bdo.balance));
                                    bdo.balance-=withdraw;
                                    printf("\n\nWithdraw successful.");
-                                   printf("\nYour new balance: %d", bdo.balance);system("pause");break;
+                                   printf("\nYour new balance: Php %d\n", bdo.balance);system("pause");break;
                             case 3:printf("DEPOSIT MONEY\n");
                                    do{
-                                   printf("Please input amount to deposit: ");scanf("%d",&deposit);
-                                   if(deposit==0)
-                                        printf("\nMinimum deposit amount is 1.");
-                                   }while(deposit!=0);
+                                   printf("Please input amount to deposit: Php ");scanf("%d",&deposit);
+                                   if(deposit<=0)
+                                        printf("\nMinimum deposit amount is Php 1.\n");
+                                   }while(deposit<=0);
                                    bdo.balance+=deposit;
                                    printf("\n\nDeposit successful.");
-                                   printf("\nYour new balance: %d",bdo.balance);system("pause");break;
-                            case 4:printf("FUND TRANSFER");system("pause");break;                   //di ko alam pano to gagawin
-                            case 5:printf("PAY UTILITY BILLS");
+                                   printf("\nYour new balance: Php %d\n",bdo.balance);system("pause");break;
+                            case 4:printf("FUND TRANSFER\n");system("pause");break;
+                            case 5:printf("PAY UTILITY BILLS\n");
                                    int Meralco,Maynilad;
                                    Meralco=rand()%1000 + 1;
                                    Maynilad=rand()%500 + 1;
-                                   printf("Meralco Bill: %d\n", Meralco);
-                                   printf("Maynilad Bill: %d\n", Maynilad);
+                                   printf("Meralco Bill: Php %d\n", Meralco);
+                                   printf("Maynilad Bill: Php %d\n", Maynilad);
                                    printf("\n\n");
-                                   printf("Total Utility Bill: %d\n", Meralco+Maynilad);
-                                   int userNum;
+                                   printf("Total Utility Bill: Php %d\n", Meralco+Maynilad);
                                    while(1){
+                                        int userNum;
                                         printf("[1]Pay Utility Bills.\n");
                                         printf("[2]Back\n");
-                                        scanf("%d", userNum);
+                                        scanf("%d", &userNum);
                                         switch(userNum){
-                                            case 1: if(bdo.balance>(Maynilad+Meralco)){
-                                                        bdo.balance-(Maynilad+Meralco);
-                                                        printf("\nPayment successful.");
-                                                    }else
-                                                        printf("\nInsufficient Balance.");
+                                            case 1: do{
+                                                        if(bdo.balance>=(Maynilad+Meralco)){
+                                                            bdo.balance-=(Maynilad+Meralco);
+                                                            printf("\nPayment successful.\n");break;
+                                                        }else
+                                                            printf("\nInsufficient Balance.\n");
+                                                    }while(1);
                                                     system("pause");break;
                                             case 2:transactionMenu();break;
-                                            default:printf("Invalid input.\n");system("pause");
+                                            default:printf("Invalid input.\n");system("pause\n");
                                         }
-
-
+                                    break;
                                    }
                                    break;
                             case 6:menu();break;
@@ -500,7 +499,7 @@ int main(){
                         }
                     }break;
             case 3: save();saveFD();exit(0);break;
-            default: printf("Invalid input. Try again."); system("pause\n");
+            default: printf("Invalid input. Try again.");system("pause\n");
         }
     }
 }
