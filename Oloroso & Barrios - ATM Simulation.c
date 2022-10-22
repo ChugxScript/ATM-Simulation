@@ -48,8 +48,6 @@ typedef struct node{
     struct node* next;
 }LIST; LIST *L;
 
-char c,ping[7];
-
 void makenull(){
     L=NULL;
 }
@@ -60,7 +58,7 @@ int insertcard(){
         system("cls");
         printf("Please insert card...");
         fp=fopen("D:\\Database.txt","w"); //in computer
-        fp=fopen("F:\\Database.txt","w"); //in flashdrive
+        fp=fopen("F:\\Check.txt","w"); //in flashdrive
     }while(fp==NULL);
     fclose(fp);
 
@@ -75,18 +73,40 @@ int insertcard(){
     fclose(fp);
 }
 
+void addNewATMaccount(REC x){
+    LIST *p,*q,*temp;
+    q=p=L;
+    temp = (LIST*) ((malloc(sizeof(LIST))));
+    temp->atm = x;
+    while (p!=NULL && strcmp (x.accountName, p->atm.accountName)>=0){
+        q=p;
+        p=p->next;
+    }
+    if (p==L){
+        L=temp;
+    }else{
+        q->next = temp;
+    }temp->next = p;
+}
+
 void retrieve(){
     FILE *fp;
     REC z;
-    fp=fopen("F:\\Database.txt","r+");
+    fp=fopen("D:\\Database.txt","r+");
     if(fp==NULL){
         printf("File not found.\n");
         system("pause");
     }else{
         while(!feof(fp)){
-            fscanf(fp,"%d %[ ^\t]s %d %[ ^\t]s",&z.accountNumber, z.accountName, &z.balance, z.pinCode);
-        }
-    }fclose(fp);
+            fscanf(fp,"%d",&z.accountNumber);
+            fscanf(fp," %[ ^\t]s", z.accountName);
+            fscanf(fp,"%d", &z.balance);
+            fscanf(fp," %[ ^\t]s", z.pinCode);
+            fscanf(fp,"%d %d %d", &z.month, &z.day, &z.year);
+            fscanf(fp," %[ ^\n]s", z.contactNumber);
+            addNewATMaccount(z);
+        }fclose(fp);
+    }
 }
 
 void birthDayy(REC *bday){
@@ -112,9 +132,10 @@ void birthDayy(REC *bday){
     }
 }
 
-int checkPin(char n[7]){
+int checkPin(char *n[7]){
     LIST *p, *q;
     p=q=L;
+    printf("\n n=%s, pinCode=%s",n,p->atm.pinCode);system("pause");
     while(p!=NULL && strcmp (n, p->atm.pinCode)!=0){
         q=p;
         p=p->next;
@@ -157,9 +178,10 @@ void pin(REC *x, int a){
             index=0;
             goto b;
         }
-    }else{
+    }else if(a==2){
         do{
             c:
+            index=0;
             system ("cls");
             printf("\nPIN Code: ");
             while((ch=getch())!=13 && index<5){
@@ -182,7 +204,7 @@ void pin(REC *x, int a){
             }x->pinCode[index]='\0';
             if(strlen(x->pinCode)<4)
                 goto c;
-        }while(checkPin(x->pinCode)==1);
+        }while(checkPin(&x->pinCode)==1);
     }
 
     /*printf("\n\nPin Code = %s\n",x.pinCode); system("pause");
@@ -196,22 +218,6 @@ void pin(REC *x, int a){
         x->pinCode[z]=x->pinCode[z] - 70;
         z++;
     }printf("\nDecrypted Pin Code = %s\n",x->pinCode); system("pause");*/
-}
-
-void addNewATMaccount(REC x){
-    LIST *p,*q,*temp;
-    q=p=L;
-    temp = (LIST*) ((malloc(sizeof(LIST))));
-    temp->atm = x;
-    while (p!=NULL && strcmp (x.accountName, p->atm.accountName)>=0){
-        q=p;
-        p=p->next;
-    }
-    if (p==L){
-        L=temp;
-    }else{
-        q->next = temp;
-    }temp->next = p;
 }
 
 void regMode(){
@@ -267,29 +273,32 @@ void regMode(){
 void save(){
     FILE *fp;
     LIST *p; p=L;
-    fp = fopen("D:\\Database.txt","w+"); //save to computer
+    fp = fopen("D:\\Database.txt","w");
     if (fp==NULL){
         printf("Error 404. File not found.\n");
         system("pause");
     }
     else {
         while(p!=NULL){
-        fprintf(fp,"%d \t%s \t%d \t%s \t%d %d %d \t%s",
+        fprintf(fp,"%d %s\t%d %s\t%d %d %d %s\n",
                 p->atm.accountNumber,p->atm.accountName,p->atm.balance,p->atm.pinCode,p->atm.month,p->atm.day,p->atm.year,p->atm.contactNumber);
         p=p->next;
         }fclose(fp);
-
-        fp = fopen("D:\\ATM.txt","w+"); //save to computer
-        fp = fopen("F:\\ATM.txt","w+"); //save to flashdrive
-        if (fp==NULL){
-            printf("Error 404. File not found.\n");
-            system("pause");
-        } else {
-            while(p!=NULL){
-            fprintf(fp,"%d \t%s \t%d \t%s",p->atm.accountNumber,p->atm.accountName,p->atm.balance,p->atm.pinCode);
-            p=p->next;
-          }fclose(fp);
-        }
+    }
+}
+void saveFD(){
+    FILE *fp;
+    LIST *p; p=L;
+    fp = fopen("F:\\ATM.txt","w");
+    if (fp==NULL){
+        printf("Error 404. File not found.\n");
+        system("pause");
+    }
+    else {
+        while(p!=NULL){
+        fprintf(fp,"%d\t%s\t%d\t%s\n",p->atm.accountNumber,p->atm.accountName,p->atm.balance,p->atm.pinCode);
+        p=p->next;
+        }fclose(fp);
     }
 }
 
@@ -422,15 +431,17 @@ void deleteAccount(char n[31]){
 
 int main(){
     int withdraw,deposit;
+    LIST *p;p=L;
     REC bdo;
     srand(time(NULL));
     makenull();
     switch(insertcard()){
-        case 1: retrieve();
-                regMode();
+        case 1: regMode();
                 printf("\nREGISTRATION SUCCESSFULLY\n"); system("pause");
                 break;
-        case 2: pin(&bdo,2);
+        case 2: retrieve();
+                printf("\nbdo=%s,   atm=%s",bdo.pinCode,p->atm.pinCode);system("pause");
+                pin(&bdo,2);
                 printf("\n");
     }
 
@@ -505,7 +516,7 @@ int main(){
                             default:printf("Invalid input.\n");transactionMenu();
                         }
                     }break;
-            case 3: save();exit(0);break;
+            case 3: save();saveFD();exit(0);break;
             default: printf("Invalid input. Try again."); system("pause\n");
         }
     }
