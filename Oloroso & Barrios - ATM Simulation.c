@@ -27,12 +27,12 @@ Pwede gawing pulldown keme yung birthday
 */
 
 typedef struct details{
-    char accountName[31];
     int accountNumber;
-    int month,day,year;
-    char contactNumber[12];
+    char accountName[31];
     int balance;
     char pinCode[7];
+    int month,day,year;
+    char contactNumber[12];
 }REC;
 typedef struct node{
     REC atm;
@@ -66,7 +66,7 @@ int insertcard(){
 void addNewATMaccount(REC x){
     LIST *p,*q,*temp;
     q=p=L;
-    temp = (LIST*) ((malloc(sizeof(LIST))));
+    temp = (LIST*) malloc(sizeof(LIST));
     temp->atm = x;
     while (p!=NULL && strcmp (x.accountName, p->atm.accountName)>=0){
         q=p;
@@ -88,12 +88,12 @@ void retrieve(){
         system("pause");
     }else{
         while(!feof(fp)){
-            fscanf(fp,"%d",&z.accountNumber);
             fscanf(fp," %[^\t]s", z.accountName);
-            fscanf(fp,"%d", &z.balance);
+            fscanf(fp,"%d",&z.accountNumber);
             fscanf(fp," %[^\t]s", z.pinCode);
-            fscanf(fp,"%d %d %d", &z.month, &z.day, &z.year);
-            fscanf(fp," %[^\n]s", z.contactNumber);
+            fscanf(fp,"%d", &z.balance);
+            fscanf(fp," %[^\t]s", z.contactNumber);
+            fscanf(fp,"%d %d %d\n", &z.month, &z.day, &z.year);
             addNewATMaccount(z);
         }fclose(fp);
     }
@@ -315,9 +315,8 @@ void save(){
     }
     else {
         while(p!=NULL){
-        fprintf(fp,"%d\t%s\t%d\t%s\t%d %d %d\t%s",
-                p->atm.accountNumber,p->atm.accountName,p->atm.balance,p->atm.pinCode,p->atm.month,p->atm.day,p->atm.year,p->atm.contactNumber);
-        fprintf(fp,"\n");
+        fprintf(fp,"%s\t%d\t%s\t%d\t%s\t%d %d %d\n",
+                p->atm.accountName,p->atm.accountNumber,p->atm.pinCode,p->atm.balance,p->atm.contactNumber,p->atm.month,p->atm.day,p->atm.year);
         p=p->next;
         }fclose(fp);
     }
@@ -379,13 +378,25 @@ int transactionMenu(){
     }
 }
 
+void display(){
+    LIST *p;
+    int x = 1;
+    p=L;
+    printf("ALL LIST: \n");
+    while (p!=NULL){
+        printf("%d.) %d\t%s\t%d\t%s\t%d %d %d\t%s\n",x++,p->atm.accountNumber,p->atm.accountName,p->atm.balance,p->atm.pinCode,p->atm.month,p->atm.day,p->atm.year,p->atm.contactNumber);
+        p=p->next;
+    }
+    system("pause");
+}
+
 int main(){
     int x,withdraw,deposit,index=2;
     char ch;
     REC bdo;
-    LIST *p;p=L;
     srand(time(NULL));
     makenull();
+    retrieve();
     switch(insertcard()){
         case 1: bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
                 bdo.accountNumber = rand() % 99999 + 10000; //10k para sure na 5 digits
@@ -433,8 +444,8 @@ int main(){
                 addNewATMaccount(bdo);
                 printf("\nREGISTRATION SUCCESSFULLY\n"); system("pause");
                 break;
-        case 2: retrieve();
-                pin(&bdo,2);
+        case 2: pin(&bdo,2);
+                display();
                 break;
     }
 
@@ -503,8 +514,6 @@ int main(){
                                             case 2:transactionMenu();break;
                                             default:printf("Invalid input.\n");system("pause");
                                         }
-
-
                                    }
                                    break;
                             case 6:menu();break;
