@@ -432,10 +432,10 @@ void transfer(int x, REC *bdo){
     }
 }
 
-int uniqueAcc(REC* uniAcc){
+int uniqueAcc(int x){
 LIST *p, *q;
 p=q=L;
-while(p!=NULL && uniAcc->accountNumber!=p->atm.accountNumber){
+while(p!=NULL && x!=p->atm.accountNumber){
         q=p;
         p=p->next;
 }
@@ -456,7 +456,7 @@ int main(){
         case 1: bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
                 do{
                         bdo.accountNumber = rand() % 99999 + 10000;
-                }while(uniqueAcc(&bdo)==1);
+                }while(uniqueAcc(bdo.accountNumber)==1);
                 system("cls");
                 printf("REGISTRATION MODULE\n");
                 printf("Please fill out the following informations: \n\n");
