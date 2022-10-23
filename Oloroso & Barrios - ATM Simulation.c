@@ -37,7 +37,12 @@ typedef struct details{
 typedef struct node{
     REC atm;
     struct node* next;
-}LIST; LIST *L;
+}LIST;LIST *L;
+
+//global variables
+int balanceFD, accNumFD;
+char nameFD[31];
+char pinCodeFD[7];
 
 void makenull(){
     L=NULL;
@@ -97,6 +102,23 @@ void retrieve(){
             addNewATMaccount(z);
         }fclose(fp);
     }
+
+    fp=fopen("F:\\ATM.txt","r+");
+    if(fp==NULL){
+        printf("File not found.\n");
+        system("pause");
+    }else{
+        while(!feof(fp)){
+            fscanf(fp," %[^\t]s", z.accountName);
+            fscanf(fp,"%d", &z.balance);
+            fscanf(fp," %[^\t]s", z.pinCode);
+            fscanf(fp,"%d", &z.accountNumber);
+        }fclose(fp);
+        strcpy(nameFD,z.accountName);
+        balanceFD = z.balance;
+        strcpy(pinCodeFD,z.pinCode);
+        accNumFD = z.accountNumber;
+    }
 }
 
 void birthDayy(REC *bday){
@@ -125,7 +147,7 @@ void birthDayy(REC *bday){
 int checkPin(char *n[7]){
     LIST *p, *q;
     p=q=L;
-    while(p!=NULL && strcmp (n, p->atm.pinCode)!=0){
+    while(p!=NULL && strcmp (n, pinCodeFD)!=0){
         q=p;
         p=p->next;
     }
@@ -271,7 +293,7 @@ void updateAccount(char n[31]){
                 case 4: printf("\nPlease Enter CURRENT Pin Code\n");system("pause");pin(&bdo,2);//checkPin(); kailangan i-compare to every lagay ng user
                         printf("\nPlease Enter NEW Pin Code");pin(&bdo,1);
                         strcpy(p->atm.pinCode,bdo.pinCode); break;
-                case 5: printf("\n%s's account is successfully updated.", bdo.accountName);system("pause");break;
+                case 5: printf("\n%s's account is successfully updated.", p->atm.accountName);system("pause");break;
                 default: printf("\nSelect 1-6 only\n");system("pause");
             }
         }
@@ -282,7 +304,7 @@ void deleteAccount(char n[31]){
     int userChoice;
     LIST *p, *q;
     p=q=L;
-    while(p!=NULL && strcmp (n, p->atm.accountName)!=0){
+    while(p!=NULL && strcmp (n, p->atm.pinCode)!=0){
         q=p;
         p=p->next;
     }
@@ -295,10 +317,15 @@ void deleteAccount(char n[31]){
         scanf("%d", &userChoice);
         if(userChoice==1){
             if (p==L){
-            L=p->next;
+                L=p->next;
             }else{
-            q->next=p->next;
-            }free(p);printf("%s's account is successfully deleted.\n",n);system("pause");
+                q->next=p->next;
+            }
+            if(remove("F:\\ATM.txt")==0){
+                free(p);printf("%s's account is successfully deleted.\n",n);system("pause");
+            }else{
+                printf("\nDeletion not successfull.");system("pause");
+            }
         }else{
             AccountMenu();
         }
@@ -330,10 +357,8 @@ void saveFD(){
         system("pause");
     }
     else {
-        while(p!=NULL){
-        fprintf(fp,"%d\t%s\t%d\t%s\n",p->atm.accountNumber,p->atm.accountName,p->atm.balance,p->atm.pinCode);
-        p=p->next;
-        }fclose(fp);
+        fprintf(fp,"%s\t%d\t%s\t%d\n",p->atm.accountName,p->atm.balance,p->atm.pinCode,p->atm.accountNumber);
+        fclose(fp);
     }
 }
 
@@ -459,9 +484,8 @@ int main(){
                         system("cls");printf("Input Account Pin Code\n");system("pause");pin(&bdo,2);
                         updateAccount(bdo.pinCode); break;
                     }else if(x==2){
-                        system("cls");
-                        printf("Input Account Name to be deleted: ");scanf(" %[^\n]s",bdo.accountName);
-                        deleteAccount(bdo.accountName); break;
+                        system("cls");printf("Input Account Pin Code\n");system("pause");pin(&bdo,2);
+                        deleteAccount(bdo.pinCode); break;
                     }else if(x==3){
                         break;
                     }else{
