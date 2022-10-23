@@ -7,20 +7,15 @@ by Andrew R. Oloroso and Armand Angelo C. Barrios*/
 #include <string.h>
 #include <ctype.h>
 #include <time.h>
-
-//tinanggal ko muna yung mga comments sa codes dati para makita mo yung mga kemeru, balik nalang siguro pag tapos na natin
+#include <windows.h>
 
 /*
-READ THIS SHITTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT BROOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO!
 Mga Problema/Kulang:
-1. Yung display ng birthday sa update
+1. Nastustuck sa pincheck pag nakalimutan HAHA
 2. Fund Transfer, di ko alam paano to gagawin
 3. Yung decrypt (san banda to nakalagay)
 4. Encrypt (san din to nakalagay)
-5. Yung sa update tas delete account pre, di na need yung name kasi bakit mo naman idedelete/i-uupdate account ng iba HAHAHA
-    siguro tanong nalang yung pin, tas pag tama, g na yon.
-6. pag pindot ko ng enter sa pincode nadadagdagan ng isang ' * '
-7. Account number kailangan unique or kailangan icompare yung acc number sa database
+5. Account number kailangan unique or kailangan icompare yung acc number sa database
 
 Not priority pero magandang idagdag pag tapos na program
 Pwede gawing pulldown keme yung birthday
@@ -53,11 +48,11 @@ int insertcard(){
     do{
         system("cls");
         printf("Please insert card...");
-        fp=fopen("F:\\Check.txt","w"); //in flashdrive
+        fp=fopen("E:\\Check.txt","w"); //in flashdrive
     }while(fp==NULL);
     fclose(fp);
 
-    fp=fopen("F:\\ATM.txt","r");
+    fp=fopen("E:\\ATM.txt","r");
     if(fp==NULL){
         printf("\nNOT YET REGISTERED\n"); system("pause");
         system("cls"); return 1;
@@ -103,7 +98,7 @@ void retrieve(){
         }fclose(fp);
     }
 
-    fp=fopen("F:\\ATM.txt","r+");
+    fp=fopen("E:\\ATM.txt","r+");
     if(fp==NULL){
         printf("File not found.\n");
         system("pause");
@@ -351,7 +346,7 @@ void save(){
 void saveFD(){
     FILE *fp;
     LIST *p; p=L;
-    fp = fopen("F:\\ATM.txt","w+");
+    fp = fopen("E:\\ATM.txt","w+");
     if (fp==NULL){
         printf("Error 404. File not found.\n");
         system("pause");
@@ -384,7 +379,6 @@ int AccountMenu(){
     printf("\nEnter your choice 1-3: ");
     scanf("%d", &UserNum);
     return UserNum;
-    //lalagay siguro rito ng function na checker sa pincode tapos isang tanungan nalang or bago mag Account Menu?
 }
 int transactionMenu(){
     int UserNum;
@@ -415,8 +409,37 @@ void display(){
     system("pause");
 }
 
+void transfer(int x){
+    FILE *fp;
+    REC bdo;
+    int transfer;
+    LIST *p, *q;
+    p=q=L;
+    while(p!=NULL && x!=p->atm.accountNumber){
+        q=p;
+        p=p->next;
+    }
+    if (p==NULL){
+        printf("\nAccount not found.\n");
+    }else{
+        printf("\nAccount found!");
+        do{
+            printf("\nInput amount to transfer: Php ");
+            scanf("%d",&transfer);
+            if(transfer>bdo.balance)
+                    printf("\nInsufficient balance.");
+            else if(transfer<=0)
+                    printf("\nMinimum transfer amount is Php 1");
+        }while(transfer>bdo.balance || transfer<=0);
+        bdo.balance-=transfer;
+        p->atm.balance+=transfer;
+        printf("\nAmount was successfully transferred to %s.\n",p->atm.accountName);
+        printf("Your new balance: Php %d", bdo.balance);
+    }
+}
+
 int main(){
-    int x,withdraw,deposit,index=2;
+    int x,withdraw,deposit,accTransfer,index=2;
     char ch;
     REC bdo;
     srand(time(NULL));
@@ -456,18 +479,18 @@ int main(){
                     bdo.contactNumber[index++]=ch;
                     putchar('*');
                 }bdo.contactNumber[index]='\0';
-                if(strlen(bdo.contactNumber)<11)
+                if(strlen(bdo.contactNumber)!=11)
                     goto a;
                 printf("\nContact Number: %s",bdo.contactNumber);
 
                 do{
-                    printf("\nInitial Deposit (Min. 5,000): ");scanf("%d", &bdo.balance);
+                    printf("\nInitial Deposit (Min. 5,000): Php ");scanf("%d", &bdo.balance);
                     if(bdo.balance<5000)
-                        printf("Minimum deposit is 5000 petot, betch.\n");
+                        printf("Minimum deposit is Php 5000.\n");
                 }while(bdo.balance<5000);
                 pin(&bdo,1); printf("\nPIN Code: %s\n\n", bdo.pinCode);system("pause");
                 addNewATMaccount(bdo);
-                printf("\nREGISTRATION SUCCESSFULLY\n"); system("pause");
+                printf("\nREGISTRATION SUCCESSFUL\n"); system("pause");
                 break;
         case 2: pin(&bdo,2);
                 display();
@@ -481,10 +504,10 @@ int main(){
                     b:
                     x = AccountMenu();
                     if(x==1){
-                        system("cls");printf("Input Account Pin Code\n");system("pause");pin(&bdo,2);
+                        system("cls");printf("Input Account Pin Code: \n");system("pause");pin(&bdo,2);
                         updateAccount(bdo.pinCode); break;
                     }else if(x==2){
-                        system("cls");printf("Input Account Pin Code\n");system("pause");pin(&bdo,2);
+                        system("cls");printf("Input Account Pin Code: \n");system("pause");pin(&bdo,2);
                         deleteAccount(bdo.pinCode); break;
                     }else if(x==3){
                         break;
@@ -495,49 +518,67 @@ int main(){
                     while(1){
                         switch(transactionMenu()){
                             case 1:printf("BALANCE INQUIRY\n");
-                                   printf("Current Balance: %d", bdo.balance);system("pause");break;
+                                   printf("Current Balance: Php %d", bdo.balance);system("pause");break;
                             case 2:printf("WITHDRAW MONEY\n");
-                                   do{
-                                   printf("Please input amount to withdraw: ");scanf("%d",&withdraw);
-                                   if(withdraw>(bdo.balance))
-                                        printf("\nInsufficient Balance.");
-                                   }while(withdraw>(bdo.balance));
-                                   bdo.balance-=withdraw;
-                                   printf("\n\nWithdraw successful.");
-                                   printf("\nYour new balance: %d", bdo.balance);system("pause");break;
+                                   if(bdo.balance!=0){
+                                        do{
+                                            printf("Please input amount to withdraw: Php ");scanf("%d",&withdraw);
+                                            if(withdraw>(bdo.balance))
+                                                printf("\nInsufficient Balance.\n");
+                                            else if(bdo.balance<0)
+                                                printf("Invalid amount.\n");
+                                            else if(bdo.balance==0)
+                                                printf("Insufficient Balance.\n");
+                                        }while(withdraw>(bdo.balance) || bdo.balance<0 || bdo.balance==0);
+                                        bdo.balance-=withdraw;
+                                        printf("\n\nWithdraw successful.");
+                                        printf("\nYour new balance: Php %d\n", bdo.balance);system("pause");break;
+                                   }else{
+                                        printf("\nYou have no balance.\n");system("pause");break;
+                                   }
                             case 3:printf("DEPOSIT MONEY\n");
                                    do{
-                                   printf("Please input amount to deposit: ");scanf("%d",&deposit);
-                                   if(deposit==0)
-                                        printf("\nMinimum deposit amount is 1.");
-                                   }while(deposit!=0);
+                                   printf("Please input amount to deposit: Php ");scanf("%d",&deposit);
+                                   if(deposit<=0)
+                                        printf("\nMinimum deposit amount is Php 1.\n");
+                                   }while(deposit<=0);
                                    bdo.balance+=deposit;
                                    printf("\n\nDeposit successful.");
-                                   printf("\nYour new balance: %d",bdo.balance);system("pause");break;
-                            case 4:printf("FUND TRANSFER");system("pause");break;                   //di ko alam pano to gagawin
-                            case 5:printf("PAY UTILITY BILLS");
+                                   printf("\nYour new balance: Php %d\n",bdo.balance);system("pause");break;
+                            case 4:printf("FUND TRANSFER\n");
+                                   do{
+                                        printf("Enter the Account No. you want to transfer: ");
+                                        scanf("%d",&accTransfer);
+                                        if(accTransfer<10000 || accTransfer>99999)
+                                            printf("\nInvalid Account Number.");
+                                   }while(accTransfer<10000 || accTransfer>99999);
+                                   transfer(accTransfer);system("pause");break;
+                            case 5:printf("PAY UTILITY BILLS\n");
                                    int Meralco,Maynilad;
                                    Meralco=rand()%1000 + 1;
                                    Maynilad=rand()%500 + 1;
-                                   printf("Meralco Bill: %d\n", Meralco);
-                                   printf("Maynilad Bill: %d\n", Maynilad);
+                                   printf("Meralco Bill: Php %d\n", Meralco);
+                                   printf("Maynilad Bill: Php %d\n", Maynilad);
                                    printf("\n\n");
-                                   printf("Total Utility Bill: %d\n", Meralco+Maynilad);
-                                   int userNum;
+                                   printf("Total Utility Bill: Php %d\n", Meralco+Maynilad);
                                    while(1){
+                                        int userNum;
                                         printf("[1]Pay Utility Bills.\n");
                                         printf("[2]Back\n");
-                                        scanf("%d", userNum);
+                                        scanf("%d", &userNum);
                                         switch(userNum){
-                                            case 1: if(bdo.balance>(Maynilad+Meralco)){
-                                                        bdo.balance-(Maynilad+Meralco);
-                                                        printf("\nPayment successful.");
-                                                    }else
-                                                        printf("\nInsufficient Balance.");
+                                            case 1: do{
+                                                        if(bdo.balance>=(Maynilad+Meralco)){
+                                                            bdo.balance-=(Maynilad+Meralco);
+                                                            printf("\nPayment successful.\n");break;
+                                                        }else
+                                                            printf("\nInsufficient Balance.\n");
+                                                    }while(1);
                                                     system("pause");break;
                                             case 2:transactionMenu();break;
-                                            default:printf("Invalid input.\n");system("pause");
+                                            default:printf("Invalid input.\n");system("pause\n");
                                         }
+                                    break;
                                    }
                                    break;
                             case 6:menu();break;
