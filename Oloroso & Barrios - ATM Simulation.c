@@ -16,8 +16,10 @@ Mga Problema/Kulang:
 3. Yung decrypt (san banda to nakalagay)
 4. Encrypt (san din to nakalagay)
 5. Account number kailangan unique or kailangan icompare yung acc number sa database (ok na ata to?)
-
+6. di maverify yung pin pag di pa nag-eexit sa first time use si user
+7. FEEELING KO MAY MALI SA RETRIEVE/SAVE YATA EWAN NAG-IIBA YUNG LAMAN NG ATM HAHAHA
 */
+
 typedef struct details{
     int accountNumber;
     char accountName[31];
@@ -455,7 +457,7 @@ int main(){
     switch(insertcard()){
         case 1: bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
                 do{
-                        bdo.accountNumber = rand() % 99999 + 10000;
+                        bdo.accountNumber = rand() % 999999 + 10000;
                 }while(uniqueAcc(bdo.accountNumber)==1);
                 system("cls");
                 printf("REGISTRATION MODULE\n");
@@ -561,7 +563,8 @@ int main(){
                                         if(accTransfer<10000 || accTransfer>99999)
                                             printf("\nInvalid Account Number.");
                                    }while(accTransfer<10000 || accTransfer>99999);
-                                   transfer(accTransfer,&bdo);system("pause");break;
+                                   transfer(accTransfer,&bdo);
+                                   system("pause");break;
                             case 5:printf("PAY UTILITY BILLS\n");
                                    int Meralco,Maynilad;
                                    Meralco=rand()%1000 + 1;
