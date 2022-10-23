@@ -98,7 +98,7 @@ void retrieve(){
         }fclose(fp);
     }
 
-    fp=fopen("E:\\ATM.txt","r+");
+    fp=fopen("F:\\ATM.txt","r+");
     if(fp==NULL){
         printf("File not found.\n");
         system("pause");
@@ -409,9 +409,8 @@ void display(){
     system("pause");
 }
 
-void transfer(int x){
+void transfer(int x, REC bdo){
     FILE *fp;
-    REC bdo;
     int transfer;
     LIST *p, *q;
     p=q=L;
@@ -496,11 +495,11 @@ int main(){
                 display();
                 break;
     }
-
+    x:
     while(1){
         system ("cls");
         switch(menu()){
-            case 1: system("cls"); printf("ACCOUNT SETTINGS\n\n");
+            case 1: system("cls"); printf("ACCOUNT MODULE\n\n");
                     b:
                     x = AccountMenu();
                     if(x==1){
@@ -552,7 +551,7 @@ int main(){
                                         if(accTransfer<10000 || accTransfer>99999)
                                             printf("\nInvalid Account Number.");
                                    }while(accTransfer<10000 || accTransfer>99999);
-                                   transfer(accTransfer);system("pause");break;
+                                   transfer(accTransfer,bdo);system("pause");break;
                             case 5:printf("PAY UTILITY BILLS\n");
                                    int Meralco,Maynilad;
                                    Meralco=rand()%1000 + 1;
@@ -581,12 +580,13 @@ int main(){
                                     break;
                                    }
                                    break;
-                            case 6:menu();break;
+                            case 6:goto x;break;
                             default:printf("Invalid input.\n");transactionMenu();
                         }
                     }break;
-            case 3: save();saveFD();exit(0);break;
+            case 3: save();saveFD();exit(0);
             default: printf("Invalid input. Try again."); system("pause\n");
         }
+        break;
     }
 }
