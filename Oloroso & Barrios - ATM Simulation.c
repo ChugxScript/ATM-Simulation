@@ -48,11 +48,11 @@ int insertcard(){
     do{
         system("cls");
         printf("Please insert card...");
-        fp=fopen("E:\\Check.txt","w"); //in flashdrive
+        fp=fopen("F:\\Check.txt","w"); //in flashdrive
     }while(fp==NULL);
     fclose(fp);
 
-    fp=fopen("E:\\ATM.txt","r");
+    fp=fopen("F:\\ATM.txt","r");
     if(fp==NULL){
         printf("\nNOT YET REGISTERED\n"); system("pause");
         system("cls"); return 1;
@@ -346,7 +346,7 @@ void save(){
 void saveFD(){
     FILE *fp;
     LIST *p; p=L;
-    fp = fopen("E:\\ATM.txt","w+");
+    fp = fopen("F:\\ATM.txt","w+");
     if (fp==NULL){
         printf("Error 404. File not found.\n");
         system("pause");
