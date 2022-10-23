@@ -12,15 +12,12 @@ by Andrew R. Oloroso and Armand Angelo C. Barrios*/
 /*
 Mga Problema/Kulang:
 1. Nastustuck sa pincheck pag nakalimutan HAHA
-2. Fund Transfer, di ko alam paano to gagawin
+2. Fund Transfer (di nababawasan si sender)
 3. Yung decrypt (san banda to nakalagay)
 4. Encrypt (san din to nakalagay)
-5. Account number kailangan unique or kailangan icompare yung acc number sa database
+5. Account number kailangan unique or kailangan icompare yung acc number sa database (ok na ata to?)
 
-Not priority pero magandang idagdag pag tapos na program
-Pwede gawing pulldown keme yung birthday
 */
-
 typedef struct details{
     int accountNumber;
     char accountName[31];
@@ -214,12 +211,10 @@ void pin(REC *x, int a){
     }
 
     /*printf("\n\nPin Code = %s\n",x.pinCode); system("pause");
-
     while(x->pinCode[y]!='\0'){
         x->pinCode[y]=x->pinCode[y] + 70;
         y++;
     }printf("\n\nEncrypted Pin Code = %s\n",x->pinCode); system("pause");
-
     while(x->pinCode[z]!='\0'){
         x->pinCode[z]=x->pinCode[z] - 70;
         z++;
@@ -409,7 +404,7 @@ void display(){
     system("pause");
 }
 
-void transfer(int x, REC bdo){
+void transfer(int x, REC *bdo){
     FILE *fp;
     int transfer;
     LIST *p, *q;
@@ -425,16 +420,29 @@ void transfer(int x, REC bdo){
         do{
             printf("\nInput amount to transfer: Php ");
             scanf("%d",&transfer);
-            if(transfer>bdo.balance)
+            if(transfer>bdo->balance)
                     printf("\nInsufficient balance.");
             else if(transfer<=0)
-                    printf("\nMinimum transfer amount is Php 1");
-        }while(transfer>bdo.balance || transfer<=0);
-        bdo.balance-=transfer;
+                    printf("\nMinimum transfer amount is Php 1.");
+        }while(transfer>bdo->balance || transfer<=0);
+        bdo->balance-=transfer;
         p->atm.balance+=transfer;
         printf("\nAmount was successfully transferred to %s.\n",p->atm.accountName);
-        printf("Your new balance: Php %d", bdo.balance);
+        printf("Your new balance: Php %d", bdo->balance);
     }
+}
+
+int uniqueAcc(REC* uniAcc){
+LIST *p, *q;
+p=q=L;
+while(p!=NULL && uniAcc->accountNumber!=p->atm.accountNumber){
+        q=p;
+        p=p->next;
+}
+if(p==NULL)
+    return 2;
+else
+    return 1;
 }
 
 int main(){
@@ -446,7 +454,9 @@ int main(){
     retrieve();
     switch(insertcard()){
         case 1: bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
-                bdo.accountNumber = rand() % 99999 + 10000; //10k para sure na 5 digits
+                do{
+                        bdo.accountNumber = rand() % 99999 + 10000;
+                }while(uniqueAcc(&bdo)==1);
                 system("cls");
                 printf("REGISTRATION MODULE\n");
                 printf("Please fill out the following informations: \n\n");
@@ -551,7 +561,7 @@ int main(){
                                         if(accTransfer<10000 || accTransfer>99999)
                                             printf("\nInvalid Account Number.");
                                    }while(accTransfer<10000 || accTransfer>99999);
-                                   transfer(accTransfer,bdo);system("pause");break;
+                                   transfer(accTransfer,&bdo);system("pause");break;
                             case 5:printf("PAY UTILITY BILLS\n");
                                    int Meralco,Maynilad;
                                    Meralco=rand()%1000 + 1;
