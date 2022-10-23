@@ -581,7 +581,7 @@ int main(){
                                                             bdo.balance-=(Maynilad+Meralco);
                                                             printf("\nPayment successful.\n");break;
                                                         }else
-                                                            printf("\nInsufficient Balance.\n");
+                                                            printf("\nInsufficient Balance.\n");break;
                                                     }while(1);
                                                     system("pause");break;
                                             case 2:transactionMenu();break;
