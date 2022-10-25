@@ -17,7 +17,7 @@ Mga Problema/Kulang:
 typedef struct details{
     int accountNumber;
     char accountName[31];
-    int balance;
+    double balance;
     char pinCode[7];
     int month,day,year;
     char contactNumber[12];
@@ -29,7 +29,7 @@ typedef struct node{
 
 //declaration of functions
 void makenull();
-void retrieve();
+void retrieve(REC *x);
 int insertcard();
 int uniqueAcc(int x);
 int pin(REC *x, int a);
@@ -50,7 +50,8 @@ void save();
 void saveFD();
 
 //global variables
-int balanceFD, accNumFD,count;
+double balanceFD;
+int accNumFD,count;
 char nameFD[31];
 char pinCodeFD[7];
 
@@ -60,9 +61,9 @@ int main(){
     REC bdo;
     srand(time(NULL));
     makenull();
-    retrieve();
+    retrieve(&bdo);
     decrypt(&bdo);
-    printf("\nBDO Name: %s AccNum: %d Pin: %s\n",bdo.accountName,bdo.accountNumber,bdo.pinCode);system("pause");
+    printf("\nBDO = Name: %s accNum: %d Pin: %s Balance: %d\n",bdo.accountName,bdo.accountNumber,bdo.pinCode,bdo.balance);system("pause");
     switch(insertcard()){
         case 1: bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
                 do{
@@ -152,10 +153,11 @@ int main(){
                                 }break;
                         case 2: system("cls"); printf("PAY BILLS\n\n");
                                 utility(&bdo); break;
-                        default: printf("\nInvalid input. Try again.\n"); system("pause");
+                        case 3: break;
+                        default: printf("\nInvalid input. Try again.\n"); system("pause");break;
                     }break;
             case 6: encrypt();save();saveFD();exit(0);break;
-            default: printf("\nInvalid input. Try again.\n"); system("pause");
+            default: printf("\nInvalid input. Try again.\n"); system("pause");break;
         }
     }
 }
@@ -165,29 +167,29 @@ void makenull(){
     L=NULL;
 }
 
-void retrieve(){
+void retrieve(REC *x){
     int i;
     FILE *fp;
-    REC z;
+    REC bdo;
     fp=fopen("D:\\Database.txt","r+");
     if(fp!=NULL){
         while(!feof(fp)){
-            fscanf(fp," %[^\t]s", z.accountName);
-            fscanf(fp,"%d",&z.accountNumber);
-            fscanf(fp," %[^\t]s", z.pinCode);
-            fscanf(fp,"%d", &z.balance);
-            fscanf(fp," %[^\t]s", z.contactNumber);
-            fscanf(fp,"%d %d %d\n", &z.month, &z.day, &z.year);
-            addNewATMaccount(z);
+            fscanf(fp," %[^\t]s", bdo.accountName);
+            fscanf(fp,"%d",&bdo.accountNumber);
+            fscanf(fp," %[^\t]s", bdo.pinCode);
+            fscanf(fp,"%d", &bdo.balance);
+            fscanf(fp," %[^\t]s", bdo.contactNumber);
+            fscanf(fp,"%d %d %d\n", &bdo.month, &bdo.day, &bdo.year);
+            addNewATMaccount(bdo);
         }fclose(fp);
     }
 
     fp=fopen("F:\\ATM.txt","r+");
     if(fp!=NULL){
-        fscanf(fp," %[^\t]s", nameFD);
-        fscanf(fp,"%d", &balanceFD);
-        fscanf(fp," %[^\t]s", pinCodeFD);
-        fscanf(fp,"%d\n", &accNumFD);
+        fscanf(fp," %[^\t]s", nameFD); strcpy(x->accountName,nameFD);
+        fscanf(fp,"%d", &balanceFD); x->balance=balanceFD;
+        fscanf(fp," %[^\t]s", pinCodeFD); strcpy(x->pinCode,pinCodeFD);
+        fscanf(fp,"%d\n", &accNumFD); x->accountNumber=accNumFD;
         fclose(fp);
     }
 }
@@ -206,7 +208,7 @@ int insertcard(){
         printf("\nNOT YET REGISTERED\n"); system("pause");
         system("cls"); return 1;
     }else{
-        printf("\nWELCOME %s!\n",p->atm.accountName);system("pause");
+        printf("\nWELCOME %s!\n",nameFD);system("pause");
         system("cls"); return 2;
     }
     fclose(fp);
@@ -406,10 +408,16 @@ void fundTransfer(REC *x,int a){
     }
     if (p==NULL){
         printf("\nAccount not found.\n");system("pause");
-    }else{
+    }else if(x->balance!=0){
+        count=0;
         printf("\n\nAccount found!\n");
         printf("Transfering money to: %s\n",p->atm.accountName);
+        printf("Your balance is: Php %d\n",x->balance);
         do{
+            count++;
+            if(count==5){
+                printf("\n\nToo many failed attempts. Please try later.\n");goto a;
+            }
             printf("\nInput amount to transfer: Php ");
             scanf("%d",&transfer);
             if(transfer>x->balance){
@@ -419,7 +427,7 @@ void fundTransfer(REC *x,int a){
             }
         }while(transfer>x->balance || transfer<=0);
         p->atm.balance+=transfer;
-        printf("\nTotal Amount of Php %d was successfully transferred to %s.\n",transfer,p->atm.accountName);system("pause");
+        printf("\nTotal Amount of Php %d was successfully transferred to %s.\n",transfer,p->atm.accountName);
 
         //back to the previous node to store the balance to the current user
         p=q=L;
@@ -428,7 +436,10 @@ void fundTransfer(REC *x,int a){
             p=p->next;
         }
         p->atm.balance-=transfer;
-        printf("\nYour Total Balance is: Php %d\n",p->atm.balance);system("pause");
+        x->balance-=transfer;
+        printf("\nYour Total Balance is: Php %d\n",p->atm.balance);a:system("pause");
+    }else{
+        printf("\nInsufficient balance. Please deposit first.\n"); system("pause");
     }
 }
 
@@ -612,7 +623,7 @@ void decrypt(REC *x){
     if(p!=NULL){
         while(p->atm.pinCode[i]!='\0'){
             p->atm.pinCode[i]=p->atm.pinCode[i] - 70;
-            x->accountNumber=p->atm.accountNumber;
+
             x->pinCode[i]=p->atm.pinCode[i];
             pinCodeFD[i]=pinCodeFD[i]-70;
             i++;
@@ -665,7 +676,7 @@ void saveFD(){
     FILE *fp;
     LIST *p, *q;
     q=p=L;
-    while (p!=NULL && p->atm.accountNumber!=accNumFD){
+    while (p!=NULL && accNumFD!=p->atm.accountNumber){
         q=p;
         p=p->next;
     }
@@ -675,7 +686,7 @@ void saveFD(){
         system("pause");
     }
     else {
-        fprintf(fp,"%s\t%d\t%s\t%d\n",q->atm.accountName,q->atm.balance,q->atm.pinCode,q->atm.accountNumber);
+        fprintf(fp,"%s\t%d\t%s\t%d\n",p->atm.accountName,p->atm.balance,p->atm.pinCode,p->atm.accountNumber);
         fclose(fp);
     }
 }
