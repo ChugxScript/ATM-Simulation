@@ -35,7 +35,7 @@ int uniqueAcc(int x);
 int pin(REC *x, int a);
 int checkPin(char *n[7]);
 void addNewATMaccount(REC x);
-void updateAccount(char n[31]);
+void updateAccount(REC *x);
 void birthDayy(REC *bday);
 void balance(REC *x);
 void withdraw(REC *x);
@@ -45,7 +45,7 @@ void utility(REC *x);
 void encrypt();
 void decrypt(REC *x);
 int transactionMenu();
-int otherTransactiontransaction();
+int otherTransaction();
 void save();
 void saveFD();
 
@@ -62,13 +62,15 @@ int main(){
     makenull();
     retrieve();
     decrypt(&bdo);
+    printf("\nBDO Name: %s AccNum: %d Pin: %s\n",bdo.accountName,bdo.accountNumber,bdo.pinCode);system("pause");
     switch(insertcard()){
         case 1: bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
                 do{
                     bdo.accountNumber = rand() % 999999 + 10000;
+                    accNumFD = bdo.accountNumber;
                 }while(uniqueAcc(bdo.accountNumber)==1);
                 system("cls");
-                printf("REGISTRATION MODULE\n");
+                printf("REGISTRATION MODULE: Creating new ATM Account\n\n");
                 printf("Please fill out the following informations: \n\n");
                 printf("\nAccount Number: %d",bdo.accountNumber);
                 printf("\nAccount Name: ");scanf(" %[^\n]s",bdo.accountName);
@@ -120,7 +122,7 @@ int main(){
 
     while(1){
         c: count=0;
-        system ("cls");printf("TRANSACTION MENU\n\n");
+        system ("cls");printf("TRANSACTION MODULE\n\n");
         switch(transactionMenu()){
             case 1: balance(&bdo); break;
             case 2: system("cls"); printf("WITHDRAW MONEY\n");
@@ -146,7 +148,7 @@ int main(){
                     switch(otherTransaction()){
                         case 1: system("cls");printf("Input Account Pin Code: \n");system("pause");
                                 if(pin(&bdo,2)!=1){
-                                    updateAccount(bdo.pinCode);
+                                    updateAccount(&bdo);
                                 }break;
                         case 2: system("cls"); printf("PAY BILLS\n\n");
                                 utility(&bdo); break;
@@ -191,6 +193,7 @@ void retrieve(){
 }
 
 int insertcard(){
+    LIST *p; p=L;
     FILE *fp;
     do{
         system("cls");
@@ -203,7 +206,7 @@ int insertcard(){
         printf("\nNOT YET REGISTERED\n"); system("pause");
         system("cls"); return 1;
     }else{
-        printf("\nWELCOME\n");system("pause");
+        printf("\nWELCOME %s!\n",p->atm.accountName);system("pause");
         system("cls"); return 2;
     }
     fclose(fp);
@@ -259,7 +262,6 @@ int pin(REC *x, int a){
                 break;
             index=0;
             system ("cls");
-            printf("\ncount: %d",count);
             printf("\nPIN Code: ");
             while((ch=getch())!=13 && index<5){
                 if (index<0){
@@ -327,7 +329,7 @@ void addNewATMaccount(REC x){
 void balance(REC *x){
     LIST *p, *q;
     p=q=L;
-    while(p!=NULL && strcmp(x->pinCode,p->atm.pinCode)!=0){
+    while(p!=NULL && x->accountNumber!=p->atm.accountNumber){
         q=p;
         p=p->next;
     }
@@ -345,7 +347,7 @@ void withdraw(REC *x){
     int withdraww;
     LIST *p, *q;
     p=q=L;
-    while(p!=NULL && strcmp(x->pinCode,p->atm.pinCode)!=0){
+    while(p!=NULL && x->accountNumber!=p->atm.accountNumber){
         q=p;
         p=p->next;
     }
@@ -375,7 +377,7 @@ void deposit(REC *x){
     int depositt;
     LIST *p, *q;
     p=q=L;
-    while(p!=NULL && strcmp(x->pinCode,p->atm.pinCode)!=0){
+    while(p!=NULL && x->accountNumber!=p->atm.accountNumber){
         q=p;
         p=p->next;
     }
@@ -406,16 +408,18 @@ void fundTransfer(REC *x,int a){
         printf("\nAccount not found.\n");system("pause");
     }else{
         printf("\n\nAccount found!\n");
+        printf("Transfering money to: %s\n",p->atm.accountName);
         do{
             printf("\nInput amount to transfer: Php ");
             scanf("%d",&transfer);
-            if(transfer>x->balance)
-                    printf("\nInsufficient balance.");
-            else if(transfer<=0)
-                    printf("\nMinimum transfer amount is Php 1.");
+            if(transfer>x->balance){
+                 printf("\nInsufficient balance.\n"); system("pause");
+            }else if(transfer<=0){
+                printf("\nMinimum transfer amount is Php 1.\n");system("pause");
+            }
         }while(transfer>x->balance || transfer<=0);
         p->atm.balance+=transfer;
-        printf("\nAmount was successfully transferred to %s   total balance: %d.\n",p->atm.accountName,p->atm.balance);
+        printf("\nTotal Amount of Php %d was successfully transferred to %s.\n",transfer,p->atm.accountName);system("pause");
 
         //back to the previous node to store the balance to the current user
         p=q=L;
@@ -424,24 +428,24 @@ void fundTransfer(REC *x,int a){
             p=p->next;
         }
         p->atm.balance-=transfer;
+        printf("\nYour Total Balance is: Php %d\n",p->atm.balance);system("pause");
     }
 }
 
-void updateAccount(char n[31]){
-    int x,index=2;
+void updateAccount(REC *x){
+    int y,index=2;
     char ch;
     REC bdo;
     LIST *p, *q;
-    p=q=L;
-    while(p!=NULL && strcmp (n, p->atm.pinCode)!=0){
+    q=p=L;
+    while(p!=NULL && x->accountNumber!=p->atm.accountNumber){
         q=p;
-        printf("\n%s  ",p->atm.pinCode);
         p=p->next;
     }
     if(p==NULL){
             printf("Account not found.\n");system("pause");
     }else{
-        while(x!=5){
+        while(y!=5){
             system("cls");
             printf("Updating Account: \n");
             printf("\nAccount Number: %d",p->atm.accountNumber);
@@ -455,8 +459,8 @@ void updateAccount(char n[31]){
             printf("\n[3] Contact Number");
             printf("\n[4] Change PIN Code");
             printf("\n[5] Back");
-            printf("\n\nEnter a Number: ");scanf("%d", &x);
-            switch(x){
+            printf("\n\nEnter a Number: ");scanf("%d", &y);
+            switch(y){
                 case 1: printf("\nInput new Account Name: ");scanf(" %[^\n]s",bdo.accountName);
                         strcpy(p->atm.accountName,bdo.accountName); break;
                 case 2: birthDayy(&bdo);
@@ -528,7 +532,7 @@ void utility(REC *x){
     int Meralco,Maynilad,userNum;
     LIST *p, *q;
     p=q=L;
-    while(p!=NULL && strcmp(x->pinCode,p->atm.pinCode)!=0){
+    while(p!=NULL && x->accountNumber!=p->atm.accountNumber){
         q=p;
         p=p->next;
     }
@@ -548,17 +552,15 @@ void utility(REC *x){
                     printf("[1]Pay Meralco Bill\n");
                     printf("[2]Back\n");
                     scanf("%d",&userNum);
-                    while(userNum!=2){
-                        switch(userNum){
-                            case 1: if(p->atm.balance>=Meralco){
-                                        p->atm.balance-=Meralco;
-                                        printf("\nPayment successful.\n");
-                                    }else{
-                                        printf("\nInsufficient Balance.\n");
-                                    }system("pause");break;
-                            case 2: break;
-                            default: printf("\nInvalid input.\n");system("pause");
-                        }
+                    switch(userNum){
+                        case 1: if(p->atm.balance>=Meralco){
+                                    p->atm.balance-=Meralco;
+                                    printf("\nPayment successful.\n");
+                                }else{
+                                    printf("\nInsufficient Balance.\n");
+                                }system("pause");break;
+                        case 2: break;
+                        default: printf("\nInvalid input.\n");system("pause");
                     }break;
             case 2: system("cls");
                     Maynilad=rand()%800 + 1;
@@ -568,17 +570,15 @@ void utility(REC *x){
                     printf("[1]Pay Meralco Bill\n");
                     printf("[2]Back\n");
                     scanf("%d",&userNum);
-                    while(userNum!=2){
-                        switch(userNum){
-                            case 1: if(p->atm.balance>=Maynilad){
-                                        p->atm.balance-=Maynilad;
-                                        printf("\nPayment successful.\n");
-                                    }else{
-                                        printf("\nInsufficient Balance.\n");
-                                    }system("pause");break;
-                            case 2: break;
-                            default: printf("\nInvalid input.\n");system("pause");
-                        }
+                    switch(userNum){
+                        case 1: if(p->atm.balance>=Maynilad){
+                                    p->atm.balance-=Maynilad;
+                                    printf("\nPayment successful.\n");
+                                }else{
+                                    printf("\nInsufficient Balance.\n");
+                                }system("pause");break;
+                        case 2: break;
+                        default: printf("\nInvalid input.\n");system("pause");
                     }break;
             case 3: break;
             default: printf("\nInvalid input.\n");system("pause");
@@ -588,31 +588,41 @@ void utility(REC *x){
 
 void encrypt(){
     int i=0;
-    LIST *p; p=L;
-    while(p!=NULL){
+    LIST *p, *q;
+    q=p=L;
+    while(p!=NULL && p->atm.accountNumber!=accNumFD){
+        q=p;
+        p=p->next;
+    }
+    if(p!=NULL){
         while(p->atm.pinCode[i]!='\0'){
             p->atm.pinCode[i]=p->atm.pinCode[i] + 70;
             i++;
-        }p=p->next;
+        }
     }
 }
 void decrypt(REC *x){
     int i=0;
-    LIST *p; p=L;
-    while(p!=NULL){
+    LIST *p, *q;
+    q=p=L;
+    while(p!=NULL && p->atm.accountNumber!=accNumFD){
+        q=p;
+        p=p->next;
+    }
+    if(p!=NULL){
         while(p->atm.pinCode[i]!='\0'){
             p->atm.pinCode[i]=p->atm.pinCode[i] - 70;
+            x->accountNumber=p->atm.accountNumber;
             x->pinCode[i]=p->atm.pinCode[i];
             pinCodeFD[i]=pinCodeFD[i]-70;
             i++;
         }
-        p=p->next;
     }
 }
 
 int transactionMenu(){
     int UserNum;
-    printf("Choose Transaction: \n");
+    printf("TRANSACTION MENU\n");
     printf("[1] BALANCE INQUIRY\n");
     printf("[2] WITHDRAW\n");
     printf("[3] DEPOSIT\n");
@@ -655,7 +665,7 @@ void saveFD(){
     FILE *fp;
     LIST *p, *q;
     q=p=L;
-    while (p!=NULL){
+    while (p!=NULL && p->atm.accountNumber!=accNumFD){
         q=p;
         p=p->next;
     }
