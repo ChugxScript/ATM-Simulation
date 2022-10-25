@@ -45,7 +45,7 @@ void deposit(REC *x);
 void fundTransfer(REC *x, int a);
 void utility(REC *x);
 void encrypt();
-void decrypt();
+void decrypt(REC *x);
 int menu();
 int AccountMenu();
 int transactionMenu();
