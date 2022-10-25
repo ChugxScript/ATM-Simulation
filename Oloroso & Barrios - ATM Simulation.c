@@ -13,11 +13,6 @@ by Andrew R. Oloroso and Armand Angelo C. Barrios*/
 Mga Problema/Kulang:
 1. Nastustuck sa pincheck pag nakalimutan HAHA
 2. Fund Transfer (di nababawasan si sender)
-3. Yung decrypt (san banda to nakalagay)
-4. Encrypt (san din to nakalagay)
-5. Account number kailangan unique or kailangan icompare yung acc number sa database (ok na ata to?)
-6. di maverify yung pin pag di pa nag-eexit sa first time use si user (oks na ata to?)
-7. FEEELING KO MAY MALI SA RETRIEVE/SAVE YATA EWAN NAG-IIBA YUNG LAMAN NG ATM HAHAHA
 */
 
 typedef struct details{
@@ -70,7 +65,7 @@ int main(){
     srand(time(NULL));
     makenull();
     retrieve();
-    decrypt();
+    decrypt(&bdo);
     switch(insertcard()){
         case 1: bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
                 do{
@@ -210,7 +205,6 @@ int insertcard(){
         fp=fopen("F:\\Check.txt","w"); //in flashdrive
     }while(fp==NULL);
     fclose(fp);
-
     fp=fopen("F:\\ATM.txt","r");
     if(fp==NULL){
         printf("\nNOT YET REGISTERED\n"); system("pause");
@@ -598,15 +592,19 @@ void encrypt(){
         }p=p->next;
     }
 }
-void decrypt(){
+void decrypt(REC *x){
     int i=0;
     LIST *p; p=L;
     while(p!=NULL){
         while(p->atm.pinCode[i]!='\0'){
             p->atm.pinCode[i]=p->atm.pinCode[i] - 70;
+            x->pinCode[i]=p->atm.pinCode[i];
+            pinCodeFD[i]=pinCodeFD[i]-70;
             i++;
-        }p=p->next;
+        }
+        p=p->next;
     }
+    system("pause");
 }
 
 int menu(){
