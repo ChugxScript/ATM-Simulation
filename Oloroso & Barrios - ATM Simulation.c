@@ -11,8 +11,9 @@ by Andrew R. Oloroso and Armand Angelo C. Barrios*/
 
 /*
 Mga Problema/Kulang:
-1. Nastustuck sa pincheck pag nakalimutan HAHA
-2. Fund Transfer (di nababawasan si sender)
+1. exit or timer pag madami ng failed attempts?
+2. sasama ba delete?
+3. design
 */
 
 typedef struct details{
@@ -33,7 +34,7 @@ void makenull();
 void retrieve();
 int insertcard();
 int uniqueAcc(int x);
-void pin(REC *x, int a);
+int pin(REC *x, int a);
 int checkPin(char *n[7]);
 void addNewATMaccount(REC x);
 void updateAccount(char n[31]);
@@ -51,15 +52,14 @@ int AccountMenu();
 int transactionMenu();
 void save();
 void saveFD();
-void display(); //reremove to pag tapos na HAHA
 
 //global variables
-int balanceFD, accNumFD;
+int balanceFD, accNumFD,count;
 char nameFD[31];
 char pinCodeFD[7];
 
 int main(){
-    int x,accTransfer,index=2;
+    int accTransfer,index=2;
     char ch;
     REC bdo;
     srand(time(NULL));
@@ -115,28 +115,34 @@ int main(){
                 addNewATMaccount(bdo);
                 printf("\nREGISTRATION SUCCESSFUL\n"); system("pause");
                 break;
-        case 2: pin(&bdo,2);
-                break;
+        case 2: b:
+                if(pin(&bdo,2)!=1){
+                    break;
+                }else{
+                    printf("\nToo many failed attempts. Please try later.");system("pause");//gusto ko sana lagyan dito ng parang timer like 10 seconds parang ganon kaso too many failed attempts na
+                    goto b;
+                }
     }
 
     while(1){
         system ("cls");
         switch(menu()){
-            case 1: system("cls"); printf("ACCOUNT MODULE\n\n");
-                    b:
-                    x = AccountMenu();
-                    if(x==1){
-                        system("cls");printf("Input Account Pin Code: \n");system("pause");pin(&bdo,2);
-                        updateAccount(bdo.pinCode); break;
-                    }else if(x==2){
-                        system("cls");printf("Input Account Pin Code: \n");system("pause");pin(&bdo,2);
-                        deleteAccount(bdo.pinCode); break;
-                    }else if(x==3){
-                        break;
-                    }else{
-                        printf("\nSelect 1-3 only.");system("pause");goto b;
+            case 1: c:
+                    system("cls"); printf("ACCOUNT MODULE\n\n");
+                    switch(AccountMenu()){
+                        case 1: system("cls");printf("Input Account Pin Code: \n");system("pause");
+                                if(pin(&bdo,2)!=1){
+                                    updateAccount(bdo.pinCode);
+                                }break;
+                        case 2: system("cls");printf("Input Account Pin Code: \n");system("pause");
+                                if(pin(&bdo,2)!=1){
+                                    deleteAccount(bdo.pinCode);
+                                }break;
+                        case 3: break;
+                        default: printf("\nSelect 1-3 only.");system("pause");goto c;
                     }break;
-            case 2: system("cls"); printf("TRANSACTION MODULE\n\n");
+            case 2: d: count=0;
+                    system("cls"); printf("TRANSACTION MODULE\n\n");
                     switch(transactionMenu()){
                         case 1: balance(&bdo); break;
                         case 2: system("cls"); printf("WITHDRAW MONEY\n");
@@ -147,18 +153,24 @@ int main(){
                                 do{
                                     printf("Enter the Account No. you want to transfer: ");
                                     scanf("%d",&accTransfer);
-                                    if(accTransfer<10000 || accTransfer>99999)
+                                    if(accTransfer<10000 || accTransfer>99999){
                                         printf("\nInvalid Account Number.");
+                                        count++;
+                                        if(count==4){
+                                            printf("\nToo many failed attemps. Please try later.\n");system("pause");
+                                            goto d;
+                                        }
+                                    }
                                 }while(accTransfer<10000 || accTransfer>99999);
                                 fundTransfer(&bdo,accTransfer);system("pause");
                                 break;
                         case 5: system("cls"); printf("PAY UTILITY BILLS\n");
                                 utility(&bdo);break;
                         case 6:break;
-                        default: system("cls"); printf("Invalid input.\n");transactionMenu();
+                        default: system("cls"); printf("Invalid input.\n");goto d;
                     }break;
             case 3: encrypt();save();saveFD();exit(0);break;
-            default: printf("Invalid input. Try again."); system("pause\n");
+            default: printf("\nInvalid input. Try again.\n"); system("pause");
         }
     }
 }
@@ -229,7 +241,7 @@ int uniqueAcc(int x){
         return 1;
 }
 
-void pin(REC *x, int a){
+int pin(REC *x, int a){
     int index=0;
     char ch;
     if(a==1){
@@ -258,10 +270,15 @@ void pin(REC *x, int a){
             goto b;
         }strcpy(pinCodeFD,x->pinCode);
     }else if(a==2){
+        count=0;
         do{
             c:
+            count++;
+            if(count==5)
+                break;
             index=0;
             system ("cls");
+            printf("\ncount: %d",count);
             printf("\nPIN Code: ");
             while((ch=getch())!=13 && index<5){
                 if (index<0){
@@ -284,6 +301,10 @@ void pin(REC *x, int a){
             if(strlen(x->pinCode)<4)
                 goto c;
         }while(checkPin(&x->pinCode)==1);
+    }
+    if(count==5){
+        printf("\nToo many failed attemps. Please try later.\n");system("pause");
+        return 1;
     }
 }
 
@@ -380,9 +401,13 @@ void updateAccount(char n[31]){
                             goto b;
                         strcpy(p->atm.contactNumber,bdo.contactNumber);
                         break;
-                case 4: printf("\nPlease Enter CURRENT Pin Code\n");system("pause");pin(&bdo,2);
-                        printf("\nPlease Enter NEW Pin Code");pin(&bdo,1);
-                        strcpy(p->atm.pinCode,bdo.pinCode); break;
+                case 4: printf("\nPlease Enter CURRENT Pin Code\n");system("pause");
+                        if(pin(&bdo,2)!=1){
+                            printf("\nPlease Enter NEW Pin Code");pin(&bdo,1);
+                            strcpy(p->atm.pinCode,bdo.pinCode);
+                        }else{
+                            printf("\nToo many failed attemps. Please try later.");
+                        }break;
                 case 5: printf("\n%s's account is successfully updated.", p->atm.accountName);system("pause");break;
                 default: printf("\nSelect 1-6 only\n");system("pause");
             }
@@ -417,7 +442,7 @@ void deleteAccount(char n[31]){
                 printf("\nDeletion not successfull.");system("pause");
             }
         }else{
-            AccountMenu();
+            printf("\nDeletion cancelled successfully.");system("pause");
         }
     }
 }
@@ -453,7 +478,7 @@ void balance(REC *x){
         p=p->next;
     }
     if (p==NULL){
-        printf("\nAccount not found.\n");
+        printf("\nAccount not found.\n");system("pause");
     }else{
         system("cls"); printf("BALANCE INQUIRY\n");
         printf("\nAccount NAme: %s",p->atm.accountName);
@@ -471,7 +496,7 @@ void withdraw(REC *x){
         p=p->next;
     }
     if (p==NULL){
-        printf("\nAccount not found.\n");
+        printf("\nAccount not found.\n");system("pause");
     }else{
         if(p->atm.balance!=0){
             do{
@@ -501,7 +526,7 @@ void deposit(REC *x){
         p=p->next;
     }
     if (p==NULL){
-        printf("\nAccount not found.\n");
+        printf("\nAccount not found.\n");system("pause");
     }else{
         do{
             printf("Please input amount to deposit: Php ");scanf("%d",&depositt);
@@ -524,7 +549,7 @@ void fundTransfer(REC *x,int a){
         p=p->next;
     }
     if (p==NULL){
-        printf("\nAccount not found.\n");
+        printf("\nAccount not found.\n");system("pause");
     }else{
         printf("\nAccount found!");
         do{
@@ -557,27 +582,48 @@ void utility(REC *x){
         p=p->next;
     }
     if (p==NULL){
-        printf("\nAccount not found.\n");
+        printf("\nAccount not found.\n");system("pause");
     }else{
-        Meralco=rand()%1000 + 1;
-        Maynilad=rand()%500 + 1;
-        printf("Meralco Bill: Php %d\n", Meralco);
-        printf("Maynilad Bill: Php %d\n", Maynilad);
-        printf("\n\nTotal Utility Bill: Php %d", Meralco+Maynilad);
-        printf("\nAccount Balance: Php %d", p->atm.balance);
-        printf("\n\n[1]Pay Utility Bills.\n");
-        printf("[2]Back\n");
-        scanf("%d", &userNum);
+        printf("[1]Meralco Bill\n");
+        printf("[2]Maynilad Bill\n");
+        printf("[3]Back\n");
+        scanf("%d",userNum);
         switch(userNum){
-            case 1: if(p->atm.balance>=(Maynilad+Meralco)){
-                        p->atm.balance-=(Maynilad+Meralco);
-                        printf("\nPayment successful.\n");
-                    }else{
-                        printf("\nInsufficient Balance.\n");
-                    }system("pause");
-                    break;
-            case 2: break;
-            default:printf("Invalid input.\n");system("pause\n");
+            case 1: Meralco=rand()%2000 + 1;
+                    printf("\nMERALCO BILL\n\n");
+                    printf("Meralco Bill: Php %d\n", Meralco);
+                    printf("\nAccount Balance: Php %d\n\n", p->atm.balance);
+                    printf("[1]Pay Meralco Bill\n");
+                    printf("[2]Back\n");
+                    a: scanf("%d",userNum);
+                    switch(userNum){
+                        case 1: if(p->atm.balance>=Meralco){
+                                    p->atm.balance-=Meralco;
+                                    printf("\nPayment successful.\n");
+                                }else{
+                                    printf("\nInsufficient Balance.\n");
+                                }system("pause");break;
+                        case 2: break;
+                        default: printf("\nInvalid input.\n");system("pause");goto a;
+                    }break;
+            case 2: Maynilad=rand()%800 + 1;
+                    printf("\nMAYNILAD BILL\n\n");
+                    printf("Maynilad Bill: Php %d\n", Maynilad);
+                    printf("\nAccount Balance: Php %d\n\n", p->atm.balance);
+                    printf("[1]Pay Meralco Bill\n");
+                    printf("[2]Back\n");
+                    b: scanf("%d",userNum);
+                    switch(userNum){
+                        case 1: if(p->atm.balance>=Maynilad){
+                                    p->atm.balance-=Maynilad;
+                                    printf("\nPayment successful.\n");
+                                }else{
+                                    printf("\nInsufficient Balance.\n");
+                                }system("pause");break;
+                        case 2: break;
+                        default: printf("\nInvalid input.\n");system("pause");goto b;
+                    }break;
+            default: printf("\nInvalid input.\n");system("pause");
         }
     }
 }
@@ -604,7 +650,6 @@ void decrypt(REC *x){
         }
         p=p->next;
     }
-    system("pause");
 }
 
 int menu(){
@@ -619,8 +664,6 @@ int menu(){
     return UserNum;
 }
 int AccountMenu(){
-    system("cls");
-    REC other;
     int UserNum;
     printf("Choose account option: \n");
     printf("[1] Update Account\n");
@@ -632,8 +675,6 @@ int AccountMenu(){
 }
 int transactionMenu(){
     int UserNum;
-    while(1){
-    system("cls");
     printf("Choose Transaction: \n");
     printf("[1] Balance Inquiry\n");
     printf("[2] Withdraw\n");
@@ -644,7 +685,6 @@ int transactionMenu(){
     printf("\nEnter your choice 1-6: ");
     scanf("%d", &UserNum);
     return UserNum;
-    }
 }
 
 void save(){
@@ -658,10 +698,6 @@ void save(){
     }
     else {
         while(p!=NULL){
-            /*while(p->atm.pinCode[i]!='\0'){
-                p->atm.pinCode[i]=p->atm.pinCode[i] + 70;
-                i++;
-            }*/
             fprintf(fp,"%s\t%d\t%s\t%d\t%s\t%d %d %d\n",
             p->atm.accountName,p->atm.accountNumber,p->atm.pinCode,p->atm.balance,p->atm.contactNumber,p->atm.month,p->atm.day,p->atm.year);
             p=p->next;
@@ -686,16 +722,4 @@ void saveFD(){
         fprintf(fp,"%s\t%d\t%s\t%d\n",q->atm.accountName,q->atm.balance,q->atm.pinCode,q->atm.accountNumber);
         fclose(fp);
     }
-}
-
-void display(){ //tatanggalin to pero dito muna pang check lang HAHA
-    LIST *p;
-    int x = 1;
-    p=L;
-    printf("\n\nALL LIST: \n");
-    while (p!=NULL){
-        printf("%d.) %d\t%s\t%d\t%s\t%d %d %d\t%s\n",x++,p->atm.accountNumber,p->atm.accountName,p->atm.balance,p->atm.pinCode,p->atm.month,p->atm.day,p->atm.year,p->atm.contactNumber);
-        p=p->next;
-    }
-    system("pause");system("cls");
 }
