@@ -29,7 +29,7 @@ typedef struct node{
 
 //declaration of functions
 void makenull();
-void retrieve(REC *x);
+void retrieve();
 int insertcard();
 int uniqueAcc(int x);
 int pin(REC *x, int a);
@@ -43,7 +43,7 @@ void deposit(REC *x);
 void fundTransfer(REC *x, int a);
 void utility(REC *x);
 void encrypt();
-void decrypt(REC *x);
+void decrypt();
 int transactionMenu();
 int otherTransaction();
 void save();
@@ -51,11 +51,12 @@ void saveFD();
 
 //design functions
 void gotoxy(int x,int y);
+void printToxy(int x, int y, char *str);
 void setFontStyle(int FontSize);
 void delay(int ms);
 //animation functions
 void loading();
-void scanScreen();
+int scanScreen(int a);
 
 //global variables
 int balanceFD;
@@ -70,8 +71,6 @@ int main(){
     srand(time(NULL));
     makenull();
     setFontStyle(18);
-    retrieve(&bdo);
-    decrypt(&bdo);
     switch(insertcard()){
         case 1: bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
                 do{
@@ -79,17 +78,17 @@ int main(){
                     accNumFD = bdo.accountNumber;
                 }while(uniqueAcc(bdo.accountNumber)==1);
                 system("cls");
-                printf("REGISTRATION MODULE: Creating new ATM Account\n\n");
-                printf("Please fill out the following informations: \n\n");
-                printf("\nAccount Number: %d",bdo.accountNumber);
-                printf("\nAccount Name: ");scanf(" %[^\n]s",bdo.accountName);
+                printToxy(38,4,"REGISTRATION MODULE: Creating new ATM Account");
+                printToxy(38,6,"Please fill out the following informations:");
+                gotoxy(45,8); printf("Account Number: %d",bdo.accountNumber);
+                printToxy(45,9,"Account Name: ");scanf(" %[^\n]s",bdo.accountName);
                 birthDayy(&bdo);system("cls");
-                printf("REGISTRATION MODULE\n");
-                printf("Please fill out the following informations: \n\n");
-                printf("\nAccount Number: %d",bdo.accountNumber);
-                printf("\nAccount Name: %s",bdo.accountName);
-                printf("\nBirthdate (MM/DD/YYYY): %d / %d / %d",bdo.month,bdo.day,bdo.year);
-                printf("\nContact Number: 09");
+                printToxy(38,4,"REGISTRATION MODULE: Creating new ATM Account");
+                printToxy(38,6,"Please fill out the following informations:");
+                gotoxy(45,8); printf("Account Number: %d",bdo.accountNumber);
+                gotoxy(45,9); printf("Account Name: %s",bdo.accountName);
+                gotoxy(45,10); printf("Birthdate (MM/DD/YYYY): %d / %d / %d",bdo.month,bdo.day,bdo.year);
+                printToxy(45,11,"Contact Number: 09");
                 a:
                 while((ch=getch())!=13 && index<10){
                     if (index<0){
@@ -111,18 +110,22 @@ int main(){
                 }bdo.contactNumber[index]='\0';
                 if(strlen(bdo.contactNumber)!=11)
                     goto a;
-                printf("\nContact Number: %s",bdo.contactNumber);
+                gotoxy(45,11); printf("Contact Number: %s",bdo.contactNumber);
 
                 do{
-                    printf("\nInitial Deposit (Min. 5,000): Php ");scanf("%d", &bdo.balance);
+                    printToxy(45,12,"Initial Deposit (Min. 5,000): Php ");scanf("%d", &bdo.balance);
                     if(bdo.balance<5000)
-                        printf("Minimum deposit is Php 5000.\n");
+                        printToxy(45,13,"Minimum deposit is Php 5000.");
                 }while(bdo.balance<5000);
                 pin(&bdo,1);
                 addNewATMaccount(bdo);
-                printf("\nREGISTRATION SUCCESSFUL\n"); system("pause");
+                printToxy(45,15,"REGISTRATION SUCCESSFUL"); gotoxy(45,16);system("pause");
                 break;
-        case 2: if(pin(&bdo,2)==2){
+        case 2: strcpy(bdo.accountName,nameFD);
+                bdo.balance=balanceFD;
+                strcpy(bdo.pinCode,pinCodeFD);
+                bdo.accountNumber=accNumFD;
+                if(pin(&bdo,2)==2){
                     break;
                 }else{
                     printf("\nmain: Too many failed attempts. Please try later.");system("pause");exit(0);
@@ -175,7 +178,7 @@ void makenull(){
     L=NULL;
 }
 
-void retrieve(REC *x){
+void retrieve(){
     int i;
     FILE *fp;
     REC bdo;
@@ -194,10 +197,10 @@ void retrieve(REC *x){
 
     fp=fopen("F:\\ATM.txt","r+");
     if(fp!=NULL){
-        fscanf(fp," %[^\t]s", nameFD); strcpy(x->accountName,nameFD);
-        fscanf(fp,"%d", &balanceFD); x->balance=balanceFD;
-        fscanf(fp," %[^\t]s", pinCodeFD); strcpy(x->pinCode,pinCodeFD);
-        fscanf(fp,"%d\n", &accNumFD); x->accountNumber=accNumFD;
+        fscanf(fp," %[^\t]s", nameFD);
+        fscanf(fp,"%d", &balanceFD);
+        fscanf(fp," %[^\t]s", pinCodeFD);
+        fscanf(fp,"%d\n", &accNumFD);
         fclose(fp);
     }
 }
@@ -212,10 +215,13 @@ int insertcard(){
     fclose(fp);
     fp=fopen("F:\\ATM.txt","r");
     if(fp==NULL){
-        scanScreen();
+        scanScreen(1);
         gotoxy(40,12);system("pause");return 1;
     }else{
-        printf("\nWELCOME %s!\n",nameFD);system("pause");
+        retrieve();
+        decrypt();
+        scanScreen(2);
+        gotoxy(40,12);system("pause");
         system("cls"); return 2;
     }
     fclose(fp);
@@ -239,7 +245,7 @@ int pin(REC *x, int a){
     char ch;
     if(a==1){
         b:
-        printf("\nPIN Code: ");
+        printToxy(50,13,"PIN Code: ");
         while((ch=getch())!=13 && index<5){
             if (index<0){
                 index=0;
@@ -271,7 +277,7 @@ int pin(REC *x, int a){
                 break;
             index=0;
             system ("cls");
-            printf("\nPIN Code: ");
+            printToxy(40,5,"PIN Code: ");
             while((ch=getch())!=13 && index<5){
                 if (index<0){
                     index=0;
@@ -524,24 +530,33 @@ void updateAccount(REC *x){
 }
 
 void birthDayy(REC *bday){
-    printf("\nBirthday (MM/DD/YYYY)\n");
+    printToxy(45,10,"Birth MONTH (01-12): ");
     a:
-    printf("\nIf your birth month is January, enter 01");
-    printf("\nEnter your birth month: ");scanf("%d",&bday->month);
+    printToxy(38,11,"                                               ");
+    printToxy(68,10,"                                               ");
+    gotoxy(68,10);scanf("%d",&bday->month);
     if(bday->month<=0 || bday->month>12){
-        printf("\nInvalid Month.");system("pause");
+        printToxy(38,11,"Invalid Month. "); system("pause");
         goto a;
     }
+    printToxy(45,10,"                     ");
+    printToxy(45,10,"Birth  DAY (01-31) : ");
     b:
-    printf("\nEnter your birth day: ");scanf("%d",&bday->day);
+    printToxy(38,11,"                                               ");
+    printToxy(71,10,"/                                              ");
+    gotoxy(73,10);scanf("%d",&bday->day);
     if(bday->day<=0 || bday->day>31){
-        printf("\nInvalid Day.");system("pause");
+        printToxy(38,11,"Invalid Day.  ");system("pause");
         goto b;
     }
+    printToxy(45,10,"                     ");
+    printToxy(45,10,"Birth YEAR(1900-2022): ");
     c:
-    printf("\nEnter your birth year: ");scanf("%d",&bday->year);
+    printToxy(38,11,"                                               ");
+    printToxy(76,10,"/                                              ");
+    gotoxy(78,10);scanf("%d",&bday->year);
     if(bday->year<=1900 || bday->year>2022){
-        printf("\nInvalid Year.");system("pause");
+        printToxy(38,11,"Invalid Year.  ");system("pause");
         goto c;
     }
 }
@@ -619,7 +634,7 @@ void encrypt(){
         }
     }
 }
-void decrypt(REC *x){
+void decrypt(){
     int i=0;
     LIST *p, *q;
     q=p=L;
@@ -630,8 +645,6 @@ void decrypt(REC *x){
     if(p!=NULL){
         while(p->atm.pinCode[i]!='\0'){
             p->atm.pinCode[i]=p->atm.pinCode[i] - 70;
-
-            x->pinCode[i]=p->atm.pinCode[i];
             pinCodeFD[i]=pinCodeFD[i]-70;
             i++;
         }
@@ -716,6 +729,11 @@ void gotoxy(int x,int y){
     coord.Y=y;
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),coord);
 }
+void printToxy(int x, int y, char *str){
+    gotoxy(x,y);
+    printf("%s",str);
+}
+
 void delay(int ms){
     clock_t timeDelay = ms + clock();
     while(timeDelay > clock());
@@ -739,13 +757,22 @@ char load[] = {'.','.','.','o','.','.','0','o','.','0','0','o','0','0','0','o','
     }
 }
 
-void scanScreen(){
+int scanScreen(int a){
     system("cls");
     int i;
-    gotoxy(40,4);printf("S C A N N I N G   A T M   C A R D");
-    for(i=0;i<18;i++){
-        delay(100);
-        gotoxy(40+i,6);printf("||||||||||||||||");
+    if(a==1){
+        gotoxy(40,4);printf("S C A N N I N G   A T M   C A R D");
+        for(i=0;i<18;i++){
+            delay(100);
+            gotoxy(40+i,6);printf("||||||||||||||||");
+        }
+        gotoxy(39,10);printf("N O T   Y E T   R E G I S T E R E D");
+    }else{
+        gotoxy(40,4);printf("S C A N N I N G   A T M   C A R D");
+        for(i=0;i<18;i++){
+            delay(100);
+            gotoxy(40+i,6);printf("||||||||||||||||");
+        }
+        gotoxy(39,10);printf("W E L C O M E %s !",nameFD);
     }
-    gotoxy(39,10);printf("N O T   Y E T   R E G I S T E R E D");
 }
