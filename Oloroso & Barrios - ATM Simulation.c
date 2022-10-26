@@ -17,7 +17,7 @@ Mga Problema/Kulang:
 typedef struct details{
     int accountNumber;
     char accountName[31];
-    double balance;
+    int balance;
     char pinCode[7];
     int month,day,year;
     char contactNumber[12];
@@ -49,8 +49,16 @@ int otherTransaction();
 void save();
 void saveFD();
 
+//design functions
+void gotoxy(int x,int y);
+void setFontStyle(int FontSize);
+void delay(int ms);
+//animation functions
+void loading();
+void scanScreen();
+
 //global variables
-double balanceFD;
+int balanceFD;
 int accNumFD,count;
 char nameFD[31];
 char pinCodeFD[7];
@@ -61,9 +69,9 @@ int main(){
     REC bdo;
     srand(time(NULL));
     makenull();
+    setFontStyle(18);
     retrieve(&bdo);
     decrypt(&bdo);
-    printf("\nBDO = Name: %s accNum: %d Pin: %s Balance: %d\n",bdo.accountName,bdo.accountNumber,bdo.pinCode,bdo.balance);system("pause");
     switch(insertcard()){
         case 1: bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
                 do{
@@ -198,15 +206,14 @@ int insertcard(){
     LIST *p; p=L;
     FILE *fp;
     do{
-        system("cls");
-        printf("Please insert card...");
         fp=fopen("F:\\Check.txt","w"); //in flashdrive
+        loading();
     }while(fp==NULL);
     fclose(fp);
     fp=fopen("F:\\ATM.txt","r");
     if(fp==NULL){
-        printf("\nNOT YET REGISTERED\n"); system("pause");
-        system("cls"); return 1;
+        scanScreen();
+        gotoxy(40,12);system("pause");return 1;
     }else{
         printf("\nWELCOME %s!\n",nameFD);system("pause");
         system("cls"); return 2;
@@ -689,4 +696,56 @@ void saveFD(){
         fprintf(fp,"%s\t%d\t%s\t%d\n",p->atm.accountName,p->atm.balance,p->atm.pinCode,p->atm.accountNumber);
         fclose(fp);
     }
+}
+
+void setFontStyle(int FontSize){
+    CONSOLE_FONT_INFOEX cfi;
+    cfi.cbSize = sizeof(cfi);
+    cfi.nFont = 0;
+    cfi.dwFontSize.X = 0;                   // Width of each character in the font
+    cfi.dwFontSize.Y = FontSize;                  // Height
+    cfi.FontFamily = FF_DONTCARE;
+    cfi.FontWeight = FW_NORMAL;
+    wcscpy(cfi.FaceName, L"Consolas"); // font style
+    SetCurrentConsoleFontEx(GetStdHandle(STD_OUTPUT_HANDLE), FALSE, &cfi);
+}
+
+void gotoxy(int x,int y){
+    COORD coord = {0,0};
+    coord.X=x;
+    coord.Y=y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),coord);
+}
+void delay(int ms){
+    clock_t timeDelay = ms + clock();
+    while(timeDelay > clock());
+}
+
+void loading(){
+char load[] = {'.','.','.','o','.','.','0','o','.','0','0','o','0','0','0','o','0','0','.','o','0','.','.','o','.','.','.','\0'};
+    int x=0,y=1,z=2,loop=0;
+    while(loop != 9){
+        if(loop > 0){
+            x += 3;
+            y += 3;
+            z += 3;
+        }
+        delay(70);
+        system("cls");
+        gotoxy(40,4);printf("P L E A S E   I N S E R T   Y O U R   C A R D");
+        gotoxy(56,6);printf("%c   %c   %c",load[x],load[y],load[z]);
+        gotoxy(58,20);
+        loop++;
+    }
+}
+
+void scanScreen(){
+    system("cls");
+    int i;
+    gotoxy(40,4);printf("S C A N N I N G   A T M   C A R D");
+    for(i=0;i<18;i++){
+        delay(100);
+        gotoxy(40+i,6);printf("||||||||||||||||");
+    }
+    gotoxy(39,10);printf("N O T   Y E T   R E G I S T E R E D");
 }
