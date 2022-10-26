@@ -54,9 +54,12 @@ void gotoxy(int x,int y);
 void printToxy(int x, int y, char *str);
 void setFontStyle(int FontSize);
 void delay(int ms);
+void titleScreen();
+void createBlock(int x, int y, int len, char *str);
 //animation functions
 void loading();
 int scanScreen(int a);
+void cardAnimate();
 
 //global variables
 int balanceFD;
@@ -120,12 +123,15 @@ int main(){
                 pin(&bdo,1);
                 addNewATMaccount(bdo);
                 printToxy(45,15,"REGISTRATION SUCCESSFUL"); gotoxy(45,16);system("pause");
+                system("cls");titleScreen();
                 break;
         case 2: strcpy(bdo.accountName,nameFD);
                 bdo.balance=balanceFD;
                 strcpy(bdo.pinCode,pinCodeFD);
                 bdo.accountNumber=accNumFD;
                 if(pin(&bdo,2)==2){
+                    system("cls");
+                    titleScreen();
                     break;
                 }else{
                     printf("\nmain: Too many failed attempts. Please try later.");system("pause");exit(0);
@@ -134,15 +140,13 @@ int main(){
 
     while(1){
         c: count=0;
-        system ("cls");printf("TRANSACTION MODULE\n\n");
+        system ("cls");
+        printToxy(47,2,"* T R A N S A C T I O N    M O D U L E *");
         switch(transactionMenu()){
             case 1: balance(&bdo); break;
-            case 2: system("cls"); printf("WITHDRAW MONEY\n");
-                    withdraw(&bdo);break;
-            case 3: system("cls"); printf("DEPOSIT MONEY\n");
-                    deposit(&bdo); break;
-            case 4: system("cls"); printf("FUND TRANSFER\n\n");
-                    do{
+            case 2: withdraw(&bdo);break;
+            case 3: deposit(&bdo); break;
+            case 4: do{
                         printf("Enter the Account No. you want to transfer: ");
                         scanf("%d",&accTransfer);
                         if(accTransfer<10000 || accTransfer>99999){
@@ -156,7 +160,7 @@ int main(){
                     }while(accTransfer<10000 || accTransfer>99999);
                     fundTransfer(&bdo,accTransfer);
                     break;
-            case 5: system("cls"); printf("OTHER TRANSACTIONS\n");
+            case 5: system("cls");
                     switch(otherTransaction()){
                         case 1: system("cls");printf("Input Account Pin Code: \n");system("pause");
                                 if(pin(&bdo,2)!=1){
@@ -216,12 +220,12 @@ int insertcard(){
     fp=fopen("F:\\ATM.txt","r");
     if(fp==NULL){
         scanScreen(1);
-        gotoxy(40,12);system("pause");return 1;
+        gotoxy(40,11);system("pause");return 1;
     }else{
         retrieve();
         decrypt();
         scanScreen(2);
-        gotoxy(40,12);system("pause");
+        gotoxy(40,11);system("pause");
         system("cls"); return 2;
     }
     fclose(fp);
@@ -277,7 +281,7 @@ int pin(REC *x, int a){
                 break;
             index=0;
             system ("cls");
-            printToxy(40,5,"PIN Code: ");
+            printToxy(50,13,"PIN Code: ");
             while((ch=getch())!=13 && index<5){
                 if (index<0){
                     index=0;
@@ -317,10 +321,10 @@ int checkPin(char *n[7]){
         p=p->next;
     }
     if (p==NULL){
-        printf("\nWrong PIN Code\n");system("pause");
+        printToxy(50,15,"Wrong PIN Code");gotoxy(45,16);system("pause");
         return 1;
     }else{
-        printf("\nPIN verified.\n");system("pause");
+        printToxy(50,15,"PIN verified.");gotoxy(45,16);system("pause");
         return 2;
     }
 }
@@ -349,12 +353,18 @@ void balance(REC *x){
         p=p->next;
     }
     if (p==NULL){
-        printf("\nAccount not found.\n");system("pause");
+        system("cls");
+        createBlock(34,3,100," "); printToxy(50,5,"B A L A N C E   I N Q U I R Y");
+        createBlock(34,7,100," "); printToxy(55,9,"Account not found.");
+        createBlock(34,11,59," "); gotoxy(50,13); system("pause");
     }else{
-        system("cls"); printf("BALANCE INQUIRY\n");
-        printf("\nAccount NAme: %s",p->atm.accountName);
-        printf("\nCurrent Balance: Php %d\n\n", p->atm.balance);
-        system("pause"); system("cls");
+        system("cls");
+        createBlock(34,3,100," "); printToxy(50,5,"B A L A N C E   I N Q U I R Y");
+        createBlock(34,7,52," "); printToxy(35,9,"Account Name:");
+        createBlock(54,7,100," "); gotoxy(56,9);printf("%s",p->atm.accountName);
+        createBlock(34,11,52," "); printToxy(35,13,"Current Balance:");
+        createBlock(54,11,100," "); gotoxy(56,13);printf("Php %d",p->atm.balance);
+        createBlock(34,15,100,""); printToxy(50,17," "); system("pause"); system("cls");
     }
 }
 
@@ -367,23 +377,38 @@ void withdraw(REC *x){
         p=p->next;
     }
     if (p==NULL){
-        printf("\nAccount not found.\n");system("pause");
+        system("cls");
+        createBlock(34,3,100," "); printToxy(50,5,"W I T H D R A W   M O N E Y");
+        createBlock(34,7,100," "); printToxy(55,9,"Account not found.");
+        createBlock(34,11,59," "); gotoxy(50,13); system("pause");
     }else{
         if(p->atm.balance!=0){
             do{
-                printf("Please input amount to withdraw: Php ");scanf("%d",&withdraww);
-                if(withdraww>(p->atm.balance))
-                    printf("\nInsufficient Balance.\n");
-                else if(p->atm.balance<0)
-                    printf("Invalid amount.\n");
-                else if(p->atm.balance==0)
-                    printf("Insufficient Balance.\n");
-            }while(withdraww>(p->atm.balance) || p->atm.balance<0 || p->atm.balance==0);
+                system("cls");
+                createBlock(34,3,100," "); printToxy(50,5,"W I T H D R A W   M O N E Y");
+                createBlock(34,7,79," "); printToxy(36,9,"Please input amount to withdraw:");
+                createBlock(81,7,100," ");
+                createBlock(34,11,100," "); printToxy(50,13,"- - -");
+                createBlock(34,15,100," "); printToxy(45,17,"- - -");
+                createBlock(34,19,100," "); printToxy(45,21,"- - -");
+                printToxy(83,9,"Php ");scanf("%d",&withdraww);
+                if(withdraww>(p->atm.balance)){
+                    printToxy(50,13,"Insufficient Balance."); gotoxy(45,17); system("pause");
+                }else if(withdraww<=0){
+                    printToxy(50,13,"Invalid amount.");gotoxy(45,17); system("pause");
+                }else if(p->atm.balance==0){
+                    printToxy(50,13,"Insufficient Balance.");gotoxy(45,17); system("pause");
+                }
+            }while(withdraww>(p->atm.balance) || withdraww<=0 || p->atm.balance==0);
             p->atm.balance-=withdraww;
-            printf("\n\nWithdraw successful.");
-            printf("\nYour new balance: Php %d\n", p->atm.balance);system("pause");
+            printToxy(50,13,"Withdraw successful.");
+            gotoxy(45,17);printf("Your new balance: Php %d", p->atm.balance);
+            gotoxy(45,21);system("pause");
         }else{
-            printf("\nYou have no balance.\n");system("pause");
+            system("cls");
+            createBlock(34,3,100," "); printToxy(50,5,"W I T H D R A W   M O N E Y");
+            createBlock(34,7,100," "); printToxy(55,9,"You have no balance. Please deposit first.");
+            createBlock(34,11,59," "); gotoxy(50,13); system("pause");
         }
     }
 }
@@ -397,16 +422,25 @@ void deposit(REC *x){
         p=p->next;
     }
     if (p==NULL){
-        printf("\nAccount not found.\n");system("pause");
+        system("cls");
+        createBlock(34,3,100," "); printToxy(50,5,"D E P O S I T");
+        createBlock(34,7,100," "); printToxy(55,9,"Account not found.");
+        createBlock(34,11,59," "); gotoxy(50,13); system("pause");
     }else{
+        system("cls");
+        createBlock(34,3,100," "); printToxy(50,5,"D E P O S I T");
         do{
-            printf("Please input amount to deposit: Php ");scanf("%d",&depositt);
+            createBlock(34,11,100," "); printToxy(35,13,"- - -");
+            createBlock(34,15,100," "); printToxy(35,17,"- - -");
+            createBlock(34,19,100," "); printToxy(35,21,"- - -");
+            createBlock(34,7,100," "); printToxy(35,9,"Please input amount to deposit: Php "); scanf("%d",&depositt);
             if(depositt<=0)
-                printf("\nMinimum deposit amount is Php 1.\n");
+                printToxy(35,13,"Minimum deposit amount is Php 1.");
         }while(depositt<=0);
         p->atm.balance+=depositt;
-        printf("\n\nDeposit successful.");
-        printf("\nYour new balance: Php %d\n",p->atm.balance);system("pause");
+        printToxy(35,13,"Deposit successful.");
+        gotoxy(35,17); printf("Your new balance: Php %d",p->atm.balance);
+        gotoxy(35,21); system("pause");
     }
 }
 
@@ -420,27 +454,37 @@ void fundTransfer(REC *x,int a){
         p=p->next;
     }
     if (p==NULL){
-        printf("\nAccount not found.\n");system("pause");
+        system("cls");
+        createBlock(34,3,100," "); printToxy(50,5,"F U N D   T R A N S F E R");
+        createBlock(34,7,100," "); printToxy(55,9,"Account not found.");
+        createBlock(34,11,59," "); gotoxy(50,13); system("pause");
     }else if(x->balance!=0){
         count=0;
-        printf("\n\nAccount found!\n");
-        printf("Transfering money to: %s\n",p->atm.accountName);
-        printf("Your balance is: Php %d\n",x->balance);
+        system("cls");
+        createBlock(34,3,100," "); printToxy(50,5,"F U N D   T R A N S F E R");
+        createBlock(34,7,100," "); printToxy(55,9,"Account found!");
+        createBlock(34,11,59," "); printToxy(35,13,"Transfering money to:");
+        createBlock(61,11,100," "); gotoxy(62,13); printf("%s",p->atm.accountName);
+        createBlock(34,15,59," "); printToxy(35,17,"Your balance is:");
+        createBlock(61,15,100," "); gotoxy(62,17); printf("Php %d",x->balance);
+        createBlock(34,19,100," "); printToxy(35,21,"- - -");
+        createBlock(34,23,100," "); printToxy(35,25,"- - -");
+        createBlock(34,27,100," "); printToxy(35,29,"- - -");
+        createBlock(34,31,100," "); printToxy(35,33,"- - -");
         do{
             count++;
             if(count==5){
-                printf("\n\nToo many failed attempts. Please try later.\n");goto a;
+                printToxy(35,25,"Too many failed attempts. Please try later.");goto a;
             }
-            printf("\nInput amount to transfer: Php ");
-            scanf("%d",&transfer);
+            gotoxy(35,21); printf("Input amount to transfer: Php ");scanf("%d",&transfer);
             if(transfer>x->balance){
-                 printf("\nInsufficient balance.\n"); system("pause");
+                 printToxy(35,25,"Insufficient balance."); gotoxy(35,29); system("pause");
             }else if(transfer<=0){
-                printf("\nMinimum transfer amount is Php 1.\n");system("pause");
+                printToxy(35,25,"Minimum transfer amount is Php 1."); gotoxy(35,29); system("pause");
             }
         }while(transfer>x->balance || transfer<=0);
         p->atm.balance+=transfer;
-        printf("\nTotal Amount of Php %d was successfully transferred to %s.\n",transfer,p->atm.accountName);
+        gotoxy(35,25); printf("Total Amount of Php %d was successfully transferred to %s.",transfer,p->atm.accountName);
 
         //back to the previous node to store the balance to the current user
         p=q=L;
@@ -450,7 +494,8 @@ void fundTransfer(REC *x,int a){
         }
         p->atm.balance-=transfer;
         x->balance-=transfer;
-        printf("\nYour Total Balance is: Php %d\n",p->atm.balance);a:system("pause");
+        gotoxy(35,29); printf("Your Total Balance is: Php %d",p->atm.balance);
+        a: gotoxy(35,33); system("pause");
     }else{
         printf("\nInsufficient balance. Please deposit first.\n"); system("pause");
     }
@@ -467,7 +512,10 @@ void updateAccount(REC *x){
         p=p->next;
     }
     if(p==NULL){
-            printf("Account not found.\n");system("pause");
+        system("cls");
+        createBlock(34,3,100," "); printToxy(50,5,"U P D A T E   A C C O U N T");
+        createBlock(34,7,100," "); printToxy(55,9,"Account not found.");
+        createBlock(34,11,59," "); gotoxy(50,13); system("pause");
     }else{
         while(y!=5){
             system("cls");
@@ -570,7 +618,10 @@ void utility(REC *x){
         p=p->next;
     }
     if (p==NULL){
-        printf("\nAccount not found.\n");system("pause");
+        system("cls");
+        createBlock(34,3,100," "); printToxy(50,5,"P A Y   B I L L S");
+        createBlock(34,7,100," "); printToxy(55,9,"Account not found.");
+        createBlock(34,11,59," "); gotoxy(50,13); system("pause");
     }else{
         printf("[1]Meralco Bill\n");
         printf("[2]Maynilad Bill\n");
@@ -653,24 +704,23 @@ void decrypt(){
 
 int transactionMenu(){
     int UserNum;
-    printf("TRANSACTION MENU\n");
-    printf("[1] BALANCE INQUIRY\n");
-    printf("[2] WITHDRAW\n");
-    printf("[3] DEPOSIT\n");
-    printf("[4] FUND TRANSFER\n");
-    printf("[5] OTHER TRANSACTIONS\n");
-    printf("[6] EXIT\n");
-    printf("\nEnter your choice 1-6: ");
-    scanf("%d", &UserNum);
+    createBlock(34,3,100," "); printToxy(50,5,"T R A N S A C T I O N      M E N U");
+    createBlock(34,7,40," [1]"); createBlock(42,7,100," "); printToxy(50,9,"BALANCE INQUIRY\n");
+    createBlock(34,11,40," [2]"); createBlock(42,11,100," "); printToxy(50,13,"WITHDRAW");
+    createBlock(34,15,40," [3]"); createBlock(42,15,100," "); printToxy(50,17,"DEPOSIT");
+    createBlock(34,19,40," [4]"); createBlock(42,19,100," "); printToxy(50,21,"FUND TRANSFER");
+    createBlock(34,23,40," [5]"); createBlock(42,23,100," "); printToxy(50,25,"OTHER TRANSACTIONS");
+    createBlock(34,27,40," [6]"); createBlock(42,27,100," "); printToxy(50,29,"EXIT");
+    createBlock(34,31,100," "); printToxy(50,33,"Enter your choice 1-6: ");scanf("%d", &UserNum);
     return UserNum;
 }
 int otherTransaction(){
     int UserNum;
-    printf("[1] ACCOUNT SETTINGS\n");
-    printf("[2] PAY BILLS\n");
-    printf("[3] EXIT\n");
-    printf("\nEnter your choice 1-3: ");
-    scanf("%d", &UserNum);
+    createBlock(34,3,100," "); printToxy(47,5,"- O T H E R   T R A N S A C T I O N S -");
+    createBlock(34,7,40," [1]"); createBlock(42,7,100," "); printToxy(50,9,"ACCOUNT SETTINGS");
+    createBlock(34,11,40," [2]"); createBlock(42,11,100," "); printToxy(50,13,"PAY BILLS");
+    createBlock(34,15,40," [3]"); createBlock(42,15,100," "); printToxy(50,17,"BACK");
+    createBlock(34,19,100," ");printToxy(50,21,"Enter your choice 1-3: ");scanf("%d", &UserNum);
     return UserNum;
 }
 
@@ -734,6 +784,19 @@ void printToxy(int x, int y, char *str){
     printf("%s",str);
 }
 
+void createBlock(int x, int y, int len, char *str){
+    int i;
+    for(i = x; i < len; i++){
+        printToxy(i,y,"_");
+        printToxy(i,y + 3,"_");
+    }
+    for(i = y + 1; i < y + 4; i++){
+        printToxy(x - 1,i,"|");
+        printToxy(len,i,"|");
+    }
+    printToxy(x + 1, y + 2,str);
+}
+
 void delay(int ms){
     clock_t timeDelay = ms + clock();
     while(timeDelay > clock());
@@ -753,6 +816,7 @@ char load[] = {'.','.','.','o','.','.','0','o','.','0','0','o','0','0','0','o','
         gotoxy(40,4);printf("P L E A S E   I N S E R T   Y O U R   C A R D");
         gotoxy(56,6);printf("%c   %c   %c",load[x],load[y],load[z]);
         gotoxy(58,20);
+        cardAnimate();
         loop++;
     }
 }
@@ -766,13 +830,75 @@ int scanScreen(int a){
             delay(100);
             gotoxy(40+i,6);printf("||||||||||||||||");
         }
-        gotoxy(39,10);printf("N O T   Y E T   R E G I S T E R E D");
+       gotoxy(39,10);printf("N O T   Y E T   R E G I S T E R E D");
     }else{
         gotoxy(40,4);printf("S C A N N I N G   A T M   C A R D");
         for(i=0;i<18;i++){
             delay(100);
             gotoxy(40+i,6);printf("||||||||||||||||");
         }
-        gotoxy(39,10);printf("W E L C O M E %s !",nameFD);
+        gotoxy(45,10);printf("W E L C O M E %s !",nameFD);
     }
+}
+
+void titleScreen(){
+    char title [20][56]={
+        {"                                                        "},
+        {"      ##### ##            ##### ##             # ###    "},
+        {"   ######  /##         /#####  /##           /  /###    "},
+        {"  /#   /  / ##       //    /  / ###         /  /  ###   "},
+        {" /    /  /  ##      /     /  /   ###       /  ##   ###  "},
+        {"     /  /   /            /  /     ###     /  ###    ### "},
+        {"    ## ##  /            ## ##      ##    ##   ##     ## "},
+        {"    ## ## /             ## ##      ##    ##   ##     ## "},
+        {"    ## ##/              ## ##      ##    ##   ##     ## "},
+        {"    ## ## ###           ## ##      ##    ##   ##     ## "},
+        {"    ## ##   ###         ## ##      ##    ##   ##     ## "},
+        {"    #  ##     ##        #  ##      ##     ##  ##     ## "},
+        {"       /      ##           /       /       ## #      /  "},
+        {"   /##/     ###       /###/       /         ###     /   "},
+        {"  /  ########        /   ########/           ######/    "},
+        {" /     ####         /       ####               ###      "},
+        {" #                  #                                   "},
+        {"  ##                 ##                                 "},
+        {"                                                        "},
+        {"                                                        "}
+    };
+
+    for (int x=0; x<20; x++){ // for looop for printing the title screen
+        system("COLOR 0B");
+        printf("\t\t\t");
+        for (int y=0; y<56; y++){
+                printf("%c", title[x][y]);
+            }
+        printf("\n");
+        system("COLOR 0A");
+    }
+    printToxy(42,19,"~ Banco De Oloroso ~");
+    printToxy(30,20,"- It's not your money it's OUR money t(^v^t)-");
+    gotoxy(38,22);system("pause");system("cls");system("COLOR 0F");
+}
+
+void cardAnimate(){
+    int x=50,y=10;
+    printToxy(x,y,    "|_ _ _ _ _ |                ");
+    printToxy(x,y + 1,"                            ");
+    printToxy(x,y + 2,"   _ _ _ _          /\\     ");
+    printToxy(x,y + 3,"  |+_+_+_+|        /  \\    ");
+    printToxy(x,y + 4,"  |       \\       /    \\   ");
+    printToxy(x,y + 5,"  |        |     /_    _\\  ");
+    printToxy(x,y + 6,"  |        |       |  |     ");
+    printToxy(x,y + 7,"  |        |       |  |     ");
+    printToxy(x,y + 8,"  |________|       |__|     ");
+        delay(300);
+    printToxy(x,y,    "|_ _ _ _ _ |                ");
+    printToxy(x,y + 1,"  |+_+_+_+|         /\\     ");
+    printToxy(x,y + 2,"  |       \\        /  \\    ");
+    printToxy(x,y + 3,"  |        |      /    \\   ");
+    printToxy(x,y + 4,"  |        |     /_    _\\  ");
+    printToxy(x,y + 5,"  |        |       |  |     ");
+    printToxy(x,y + 6,"  |________|       |  |     ");
+    printToxy(x,y + 7,"                   |__|     ");
+    printToxy(x,y + 8,"                            ");
+        delay(300);
 }
