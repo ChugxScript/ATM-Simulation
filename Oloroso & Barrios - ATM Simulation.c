@@ -124,6 +124,7 @@ int main(){
                 if(pin(&bdo,2)==2){
                     system("cls");
                     titleScreen();
+                    updateAccount(&bdo);
                     break;
                 }else{
                     exit(0);
@@ -391,7 +392,7 @@ void withdraw(REC *x){
                 box(3,34,3,100," "); printToxy(50,5,"W I T H D R A W   M O N E Y");
                 box(3,34,7,79," "); printToxy(36,9,"Please input amount to withdraw:");
                 box(3,81,7,100," ");
-                box(3,34,11,100," "); printToxy(50,13,"- - -");
+                box(3,34,11,100," "); printToxy(45,13,"- - -");
                 box(3,34,15,100," "); printToxy(45,17,"- - -");
                 box(3,34,19,100," "); printToxy(45,21,"- - -");
                 printToxy(83,9,"Php ");scanf("%d",&withdraww);
@@ -404,7 +405,7 @@ void withdraw(REC *x){
                 }
             }while(withdraww>(p->atm.balance) || withdraww<=0 || p->atm.balance==0);
             p->atm.balance-=withdraww;
-            printToxy(50,13,"Withdraw successful.");
+            printToxy(45,13,"Withdraw successful.");
             gotoxy(45,17);printf("Your new balance: Php %d", p->atm.balance);
             gotoxy(45,21);system("pause");
         }else{
@@ -526,28 +527,32 @@ void updateAccount(REC *x){
     }else{
         while(y!=5){
             system("cls");
-            printf("Updating Account: \n");
-            printf("\nAccount Number: %d",p->atm.accountNumber);
-            printf("\nAccount Name: %s",p->atm.accountName);
-            printf("\nBirthday: %d / %d / %d",p->atm.month,p->atm.day,p->atm.year);
-            printf("\nContact Number: %s",p->atm.contactNumber);
-            printf("\nPIN Code: %s",p->atm.pinCode);
-            printf("\nUPDATE: \n");
-            printf("\n[1] Account Name");
-            printf("\n[2] Birthday");
-            printf("\n[3] Contact Number");
-            printf("\n[4] Change PIN Code");
-            printf("\n[5] Back");
-            printf("\n\nEnter a Number: ");scanf("%d", &y);
+            box(3,34,3,100,"");printToxy(52,5,"U P D A T E   A C C O U N T");
+            box(2,34,9,58,"");gotoxy(35,10);printf("Account Number: %d",p->atm.accountNumber);
+            box(2,34,7,100,"");gotoxy(35,8);printf("Account Name: %s",p->atm.accountName);
+            box(2,34,11,100,"");gotoxy(35,12);printf("Contact Number: %s",p->atm.contactNumber);
+            box(2,59,9,100,"");gotoxy(61,10);printf("Birth date: %d / %d / %d",p->atm.month,p->atm.day,p->atm.year);
+            box(2,34,13,100,"");gotoxy(35,14);printf("PIN Code: %s",p->atm.pinCode);
+
+            box(4,34,16,100,"");
+            printToxy(52,5,"U P D A T E");
+            printToxy(35,17,"[1] Account Name");
+            printToxy(35,18,"[2] Birthday");
+            printToxy(35,19,"[3] Contact Number");
+            printToxy(55,17,"[4] Change PIN Code");
+            printToxy(55,18,"[5] Back");
+            printToxy(55,21,"Enter a Number: ");scanf("%d", &y);
+
             switch(y){
-                case 1: printf("\nInput new Account Name: ");scanf(" %[^\n]s",bdo.accountName);
-                        strcpy(p->atm.accountName,bdo.accountName); break;
+                case 1: gotoxy(35,8);printf("Input new Account Name:   ");scanf(" %[^\n]s",bdo.accountName);
+                        strcpy(p->atm.accountName,bdo.accountName);break;
                 case 2: getBirthDay(&bdo);
                         p->atm.month=bdo.month; p->atm.day=bdo.day; p->atm.year=bdo.year;
                         break;
                 case 3: bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
-                        printf("\nInput new Contact Number: 09");
                         b:
+                        gotoxy(35,12);printf("                                              ");
+                        gotoxy(35,12);printf("Input new Contact Number: 09");
                         while((ch=getch())!=13 && index<10){
                             if (index<0){
                                 index=0;
@@ -570,15 +575,16 @@ void updateAccount(REC *x){
                             goto b;
                         strcpy(p->atm.contactNumber,bdo.contactNumber);
                         break;
-                case 4: printf("\nPlease Enter CURRENT Pin Code\n");system("pause");
+                case 4: system("cls");
+                        printf("Please Enter CURRENT Pin Code\n");system("pause");
                         if(pin(&bdo,2)!=1){
-                            printf("\nPlease Enter NEW Pin Code");pin(&bdo,1);
+                            printf("Please Enter NEW Pin Code");pin(&bdo,1);
                             strcpy(p->atm.pinCode,bdo.pinCode);
                         }else{
-                            printf("\nToo many failed attemps. Please try later.");
+                            printf("Too many failed attemps. Please try later.");
                         }break;
-                case 5: printf("\n%s's account is successfully updated.", p->atm.accountName);system("pause");break;
-                default: printf("\nSelect 1-6 only\n");system("pause");
+                case 5: gotoxy(55,21);printf("%s's account is successfully updated.", p->atm.accountName);gotoxy(55,22);system("pause");break;
+                default: printToxy(55,21,"Select 1-6 only.");gotoxy(55,22);system("pause");
             }
         }
     }
@@ -948,7 +954,7 @@ void cardAnimate(){
     printToxy(x,y + 6,"  |        |       |  |     ");
     printToxy(x,y + 7,"  |        |       |  |     ");
     printToxy(x,y + 8,"  |________|       |__|     ");
-        delay(300);
+        delay(1);
     printToxy(x,y,    "|_ _ _ _ _ |                ");
     printToxy(x,y + 1,"  |+_+_+_+|         /\\     ");
     printToxy(x,y + 2,"  |       \\        /  \\    ");
@@ -958,5 +964,5 @@ void cardAnimate(){
     printToxy(x,y + 6,"  |________|       |  |     ");
     printToxy(x,y + 7,"                   |__|     ");
     printToxy(x,y + 8,"                            ");
-        delay(300);
+        delay(1);
 }
