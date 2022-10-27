@@ -13,7 +13,6 @@ by Andrew R. Oloroso and Armand Angelo C. Barrios*/
 Mga Problema/Kulang:
 1. design HAHAHA
 
-error sa birthday
 error sa deposit
 */
 
@@ -39,7 +38,8 @@ int pin(REC *x, int a);
 int checkPin(char *n[7]);
 void addNewATMaccount(REC x);
 void updateAccount(REC *x);
-void birthDayy(REC *bday);
+void getBirthDay(REC *x);
+void getContact(REC *x);
 void balance(REC *x);
 void withdraw(REC *x);
 void deposit(REC *x);
@@ -55,11 +55,11 @@ void saveFD();
 //design functions
 void gotoxy(int x,int y);
 void printToxy(int x, int y, char *str);
+void box(int a,int x, int y, int len, char *str);
 void setFontStyle(int FontSize);
 void delay(int ms);
 void titleScreen();
-void createBlock(int x, int y, int len, char *str);
-void box();
+
 //animation functions
 void loading();
 int scanScreen(int a);
@@ -73,76 +73,60 @@ char pinCodeFD[7];
 
 int main(){
     int accTransfer,index=2;
-    char ch;
     REC bdo;
     srand(time(NULL));
     makenull();
     setFontStyle(18);
     switch(insertcard()){
-        case 1: system("cls");
-                box();
-                bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
+        case 1: bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
                 do{
                     bdo.accountNumber = rand() % 999999 + 10000;
                     accNumFD = bdo.accountNumber;
                 }while(uniqueAcc(bdo.accountNumber)==1);
-                printToxy(40,4,"R E G I S T R A T I O N    M O D U L E");
-                gotoxy(30,8);printf("Account Number: %d",bdo.accountNumber);
-                printToxy(30,6,"Account Name: ");scanf(" %[^\n]s",bdo.accountName);
-                birthDayy(&bdo);system("cls");
-                box();
-                printToxy(40,4,"R E G I S T R A T I O N    M O D U L E");
-                gotoxy(30,8);printf("Account Number: %d",bdo.accountNumber);
-                gotoxy(30,6);printf("Account Name: %s",bdo.accountName);
-                gotoxy(54,8);printf("Birth date: %d / %d / %d",bdo.month,bdo.day,bdo.year);
-                printToxy(30,10,"Contact Number: 09");
-                a:
-                while((ch=getch())!=13 && index<10){
-                    if (index<0){
-                        index=0;
-                    }
-                    if(ch==8){
-                        putch('\b'); putch(' ');
-                        putch('\b'); index--;
-                        continue;
-                    }
-                    if(isdigit(ch)){
-                     bdo.contactNumber[index++]=ch;
-                     putch('*');
-                    }
-                }
-                if (index==10){
-                    bdo.contactNumber[index++]=ch;
-                    putchar('*');
-                }bdo.contactNumber[index]='\0';
-                if(strlen(bdo.contactNumber)!=11)
-                    goto a;
-                gotoxy(30,10); printf("Contact Number: %s",bdo.contactNumber);
+
+                system("cls");
+                box(3,34,3,100,""); printToxy(40,5,"R E G I S T R A T I O N    M O D U L E");
+                box(2,34,7,100,""); printToxy(35,8,"Account Name: ");
+                box(2,34,9,58,""); gotoxy(35,10);printf("Account Number: %d",bdo.accountNumber);
+                box(2,34,11,100,""); printToxy(35,12,"Contact Number: 09");
+                box(2,59,9,100,""); printToxy(61,10,"Birth date:  /  /");
+                box(2,34,13,100,""); printToxy(35,14,"Initial Deposit (Min. 5,000): Php ");
+                box(3,34,15,100,""); printToxy(35,16,"PIN Code: ");
+                box(4,34,19,100,""); printToxy(45,21,"- - -"); printToxy(45,22,"- - -");
+
+                gotoxy(49,8);scanf(" %[^\n]s",bdo.accountName);
+                getBirthDay(&bdo); gotoxy(61,10); printf("Birth date: %d / %d / %d",bdo.month,bdo.day,bdo.year);
+                gotoxy(53,12); getContact(&bdo); gotoxy(35,12); printf("Contact Number: %s",bdo.contactNumber);
                 do{
-                    printToxy(45,18,"                            ");
-                    printToxy(30,12,"                                                 ");
-                    printToxy(45,22,"                               ");
-                    printToxy(30,12,"Initial Deposit (Min. 5,000): Php ");scanf("%d", &bdo.balance);
+                    printToxy(69,14,"               ");
+                    printToxy(45,21,"- - -                           ");
+                    printToxy(45,22,"- - -                           ");
+                    printToxy(35,14,"Initial Deposit (Min. 5,000): Php ");
+                    gotoxy(69,14);scanf("%d", &bdo.balance);
                     if(bdo.balance<5000){
-                        printToxy(45,18,"MIN. DEPOSIT IS PHP 5000 ! !");
+                        printToxy(45,21,"MIN. DEPOSIT IS PHP 5,000 ! !");
                         gotoxy(45,22);system("pause");
                     }
                 }while(bdo.balance<5000);
-                pin(&bdo,1);
+
+                pin(&bdo,1); gotoxy(35,16); printf("PIN Code: %s",bdo.pinCode);
+                printToxy(45,21,"R E G I S T R A T I O N    S U C C E S S F U L"); gotoxy(45,22);system("pause");
                 addNewATMaccount(bdo);
-                printToxy(36,18,"R E G I S T R A T I O N    S U C C E S S F U L");gotoxy(45,22);system("pause");
                 system("cls");titleScreen();
                 break;
         case 2: strcpy(bdo.accountName,nameFD);
                 bdo.balance=balanceFD;
                 strcpy(bdo.pinCode,pinCodeFD);
                 bdo.accountNumber=accNumFD;
+                system("cls");
+                box(3,34,16,100," "); printToxy(30,14,"PIN Code: ");
+                box(4,34,20,100," ");
                 if(pin(&bdo,2)==2){
                     system("cls");
                     titleScreen();
                     break;
                 }else{
-                    printf("\nmain: Too many failed attempts. Please try later.");system("pause");exit(0);
+                    exit(0);
                 }
     }
 
@@ -257,7 +241,8 @@ int pin(REC *x, int a){
     char ch;
     if(a==1){
         b:
-        printToxy(30,14,"PIN Code: ");
+        printToxy(45,17,"Enter 4 - 6 digits.");
+        printToxy(45,16,"       "); gotoxy(45,16);
         while((ch=getch())!=13 && index<5){
             if (index<0){
                 index=0;
@@ -278,6 +263,10 @@ int pin(REC *x, int a){
         }x->pinCode[index]='\0';
         if(strlen(x->pinCode)<4){
             index=0;
+            printToxy(45,21,"I N V A L I D   P I N");
+            gotoxy(45,22);system("pause");
+            printToxy(45,21,"- - -                         ");
+            printToxy(45,22,"- - -                           ");
             goto b;
         }strcpy(pinCodeFD,x->pinCode);
     }else if(a==2){
@@ -288,8 +277,6 @@ int pin(REC *x, int a){
             if(count==5)
                 break;
             index=0;
-            system ("cls");
-            printToxy(30,14,"PIN Code: ");
             while((ch=getch())!=13 && index<5){
                 if (index<0){
                     index=0;
@@ -308,8 +295,13 @@ int pin(REC *x, int a){
                 x->pinCode[index++]=ch;
                 putchar('*');
             }x->pinCode[index]='\0';
-            if(strlen(x->pinCode)<4)
+            if(strlen(x->pinCode)<4){
+                printToxy(45,21,"I N V A L I D   P I N");
+                gotoxy(45,22);system("pause");
+                printToxy(45,21,"- - -                         ");
+                printToxy(45,22,"- - -                           ");
                 goto c;
+            }
         }while(checkPin(&x->pinCode)==1);
     }
     if(count==5){
@@ -330,10 +322,12 @@ int checkPin(char *n[7]){
         p=p->next;
     }
     if (p==NULL){
-        printToxy(50,15,"Wrong PIN Code");gotoxy(45,16);system("pause");
+        printToxy(50,21,"Wrong PIN Code");
+        gotoxy(45,22);system("pause");
         return 1;
     }else{
-        printToxy(50,15,"PIN verified.");gotoxy(45,16);system("pause");
+        printToxy(50,21,"PIN verified.");
+        gotoxy(45,22);system("pause");
         return 2;
     }
 }
@@ -363,17 +357,17 @@ void balance(REC *x){
     }
     if (p==NULL){
         system("cls");
-        createBlock(34,3,100," "); printToxy(50,5,"B A L A N C E   I N Q U I R Y");
-        createBlock(34,7,100," "); printToxy(55,9,"Account not found.");
-        createBlock(34,11,59," "); gotoxy(50,13); system("pause");
+        box(3,34,3,100," "); printToxy(50,5,"B A L A N C E   I N Q U I R Y");
+        box(3,34,7,100," "); printToxy(55,9,"Account not found.");
+        box(3,34,11,59," "); gotoxy(50,13); system("pause");
     }else{
         system("cls");
-        createBlock(34,3,100," "); printToxy(50,5,"B A L A N C E   I N Q U I R Y");
-        createBlock(34,7,52," "); printToxy(35,9,"Account Name:");
-        createBlock(54,7,100," "); gotoxy(56,9);printf("%s",p->atm.accountName);
-        createBlock(34,11,52," "); printToxy(35,13,"Current Balance:");
-        createBlock(54,11,100," "); gotoxy(56,13);printf("Php %d",p->atm.balance);
-        createBlock(34,15,100,""); printToxy(50,17," "); system("pause"); system("cls");
+        box(3,34,3,100," "); printToxy(50,5,"B A L A N C E   I N Q U I R Y");
+        box(3,34,7,52," "); printToxy(35,9,"Account Name:");
+        box(3,54,7,100," "); gotoxy(56,9);printf("%s",p->atm.accountName);
+        box(3,34,11,52," "); printToxy(35,13,"Current Balance:");
+        box(3,54,11,100," "); gotoxy(56,13);printf("Php %d",p->atm.balance);
+        box(3,34,15,100,""); printToxy(50,17," "); system("pause"); system("cls");
     }
 }
 
@@ -387,19 +381,19 @@ void withdraw(REC *x){
     }
     if (p==NULL){
         system("cls");
-        createBlock(34,3,100," "); printToxy(50,5,"W I T H D R A W   M O N E Y");
-        createBlock(34,7,100," "); printToxy(55,9,"Account not found.");
-        createBlock(34,11,59," "); gotoxy(50,13); system("pause");
+        box(3,34,3,100," "); printToxy(50,5,"W I T H D R A W   M O N E Y");
+        box(3,34,7,100," "); printToxy(55,9,"Account not found.");
+        box(3,34,11,59," "); gotoxy(50,13); system("pause");
     }else{
         if(p->atm.balance!=0){
             do{
                 system("cls");
-                createBlock(34,3,100," "); printToxy(50,5,"W I T H D R A W   M O N E Y");
-                createBlock(34,7,79," "); printToxy(36,9,"Please input amount to withdraw:");
-                createBlock(81,7,100," ");
-                createBlock(34,11,100," "); printToxy(50,13,"- - -");
-                createBlock(34,15,100," "); printToxy(45,17,"- - -");
-                createBlock(34,19,100," "); printToxy(45,21,"- - -");
+                box(3,34,3,100," "); printToxy(50,5,"W I T H D R A W   M O N E Y");
+                box(3,34,7,79," "); printToxy(36,9,"Please input amount to withdraw:");
+                box(3,81,7,100," ");
+                box(3,34,11,100," "); printToxy(50,13,"- - -");
+                box(3,34,15,100," "); printToxy(45,17,"- - -");
+                box(3,34,19,100," "); printToxy(45,21,"- - -");
                 printToxy(83,9,"Php ");scanf("%d",&withdraww);
                 if(withdraww>(p->atm.balance)){
                     printToxy(50,13,"Insufficient Balance."); gotoxy(45,17); system("pause");
@@ -415,9 +409,9 @@ void withdraw(REC *x){
             gotoxy(45,21);system("pause");
         }else{
             system("cls");
-            createBlock(34,3,100," "); printToxy(50,5,"W I T H D R A W   M O N E Y");
-            createBlock(34,7,100," "); printToxy(55,9,"You have no balance. Please deposit first.");
-            createBlock(34,11,59," "); gotoxy(50,13); system("pause");
+            box(3,34,3,100," "); printToxy(50,5,"W I T H D R A W   M O N E Y");
+            box(3,34,7,100," "); printToxy(55,9,"You have no balance. Please deposit first.");
+            box(3,34,11,59," "); gotoxy(50,13); system("pause");
         }
     }
 }
@@ -432,17 +426,18 @@ void deposit(REC *x){
     }
     if (p==NULL){
         system("cls");
-        createBlock(34,3,100," "); printToxy(50,5,"D E P O S I T");
-        createBlock(34,7,100," "); printToxy(55,9,"Account not found.");
-        createBlock(34,11,59," "); gotoxy(50,13); system("pause");
+        box(3,34,3,100," "); printToxy(50,5,"D E P O S I T");
+        box(3,34,7,100," "); printToxy(55,9,"Account not found.");
+        box(3,34,11,59," "); gotoxy(50,13); system("pause");
     }else{
         system("cls");
-        createBlock(34,3,100," "); printToxy(50,5,"D E P O S I T");
+        box(3,34,3,100," "); printToxy(50,5,"D E P O S I T");
+        box(3,34,7,100," ");
+        box(3,34,11,100," "); printToxy(35,13,"- - -");
+        box(3,34,15,100," "); printToxy(35,17,"- - -");
+        box(3,34,19,100," "); printToxy(35,21,"- - -");
         do{
-            createBlock(34,11,100," "); printToxy(35,13,"- - -");
-            createBlock(34,15,100," "); printToxy(35,17,"- - -");
-            createBlock(34,19,100," "); printToxy(35,21,"- - -");
-            createBlock(34,7,100," "); printToxy(35,9,"Please input amount to deposit: Php "); scanf("%d",&depositt);
+            printToxy(35,9,"Please input amount to deposit: Php "); scanf("%d",&depositt);
             if(depositt<=0)
                 printToxy(35,13,"Minimum deposit amount is Php 1.");
         }while(depositt<=0);
@@ -464,22 +459,22 @@ void fundTransfer(REC *x,int a){
     }
     if (p==NULL){
         system("cls");
-        createBlock(34,3,100," "); printToxy(50,5,"F U N D   T R A N S F E R");
-        createBlock(34,7,100," "); printToxy(55,9,"Account not found.");
-        createBlock(34,11,59," "); gotoxy(50,13); system("pause");
+        box(3,34,3,100," "); printToxy(50,5,"F U N D   T R A N S F E R");
+        box(3,34,7,100," "); printToxy(55,9,"Account not found.");
+        box(3,34,11,59," "); gotoxy(50,13); system("pause");
     }else if(x->balance!=0){
         count=0;
         system("cls");
-        createBlock(34,3,100," "); printToxy(50,5,"F U N D   T R A N S F E R");
-        createBlock(34,7,100," "); printToxy(55,9,"Account found!");
-        createBlock(34,11,59," "); printToxy(35,13,"Transfering money to:");
-        createBlock(61,11,100," "); gotoxy(62,13); printf("%s",p->atm.accountName);
-        createBlock(34,15,59," "); printToxy(35,17,"Your balance is:");
-        createBlock(61,15,100," "); gotoxy(62,17); printf("Php %d",x->balance);
-        createBlock(34,19,100," "); printToxy(35,21,"- - -");
-        createBlock(34,23,100," "); printToxy(35,25,"- - -");
-        createBlock(34,27,100," "); printToxy(35,29,"- - -");
-        createBlock(34,31,100," "); printToxy(35,33,"- - -");
+        box(3,34,3,100," "); printToxy(50,5,"F U N D   T R A N S F E R");
+        box(3,34,7,100," "); printToxy(55,9,"Account found!");
+        box(3,34,11,59," "); printToxy(35,13,"Transfering money to:");
+        box(3,61,11,100," "); gotoxy(62,13); printf("%s",p->atm.accountName);
+        box(3,34,15,59," "); printToxy(35,17,"Your balance is:");
+        box(3,61,15,100," "); gotoxy(62,17); printf("Php %d",x->balance);
+        box(3,34,19,100," "); printToxy(35,21,"- - -");
+        box(3,34,23,100," "); printToxy(35,25,"- - -");
+        box(3,34,27,100," "); printToxy(35,29,"- - -");
+        box(3,34,31,100," "); printToxy(35,33,"- - -");
         do{
             count++;
             if(count==5){
@@ -506,7 +501,10 @@ void fundTransfer(REC *x,int a){
         gotoxy(35,29); printf("Your Total Balance is: Php %d",p->atm.balance);
         a: gotoxy(35,33); system("pause");
     }else{
-        printf("\nInsufficient balance. Please deposit first.\n"); system("pause");
+        system("cls");
+        box(3,34,3,100," "); printToxy(50,5,"F U N D   T R A N S F E R");
+        box(3,34,7,100," "); printToxy(55,9,"Insufficient balance. Please deposit first.");
+        box(3,34,11,59," "); gotoxy(50,13); system("pause");
     }
 }
 
@@ -522,9 +520,9 @@ void updateAccount(REC *x){
     }
     if(p==NULL){
         system("cls");
-        createBlock(34,3,100," "); printToxy(50,5,"U P D A T E   A C C O U N T");
-        createBlock(34,7,100," "); printToxy(55,9,"Account not found.");
-        createBlock(34,11,59," "); gotoxy(50,13); system("pause");
+        box(3,34,3,100," "); printToxy(50,5,"U P D A T E   A C C O U N T");
+        box(3,34,7,100," "); printToxy(55,9,"Account not found.");
+        box(3,34,11,59," "); gotoxy(50,13); system("pause");
     }else{
         while(y!=5){
             system("cls");
@@ -544,7 +542,7 @@ void updateAccount(REC *x){
             switch(y){
                 case 1: printf("\nInput new Account Name: ");scanf(" %[^\n]s",bdo.accountName);
                         strcpy(p->atm.accountName,bdo.accountName); break;
-                case 2: birthDayy(&bdo);
+                case 2: getBirthDay(&bdo);
                         p->atm.month=bdo.month; p->atm.day=bdo.day; p->atm.year=bdo.year;
                         break;
                 case 3: bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
@@ -586,41 +584,65 @@ void updateAccount(REC *x){
     }
 }
 
-void birthDayy(REC *bday){
+void getBirthDay(REC *x){
     a:
-    printToxy(36,18,"                                     ");
-    printToxy(54,8,"               ");
-    printToxy(45,22,"                               ");
-    printToxy(54,8,"Birth month: ");
-    gotoxy(67,8);scanf("%d",&bday->month);
-    if(bday->month<=0 || bday->month>12){
-        printToxy(45,18,"I N V A L I D   M O N T H !!");
+    printToxy(84,10,"   /    /       ");
+    printToxy(61,10,"Birth month(01-12):");
+    gotoxy(84,10);scanf("%d",&x->month);
+    if(x->month<=0 || x->month>12){
+        printToxy(45,21,"I N V A L I D   M O N T H !!");
         gotoxy(45,22);system("pause");
+        printToxy(45,21,"- - -                         ");
+        printToxy(45,22,"- - -                           ");
         goto a;
     }
     b:
-    printToxy(41,18,"                                     ");
-    printToxy(54,8,"Birth day:  ");
-    printToxy(70,8,"/   ");
-    printToxy(45,22,"                               ");
-    gotoxy(72,8);scanf("%d",&bday->day);
-    if(bday->day<=0 || bday->day>31){
-        printToxy(46,18,"I N V A L I D   D A Y ! !");
+    printToxy(86,10," /    /       ");
+    printToxy(61,10,"Birth  day (01-31):");
+    gotoxy(89,10);scanf("%d",&x->day);
+    if(x->day<=0 || x->day>31){
+        printToxy(45,21,"I N V A L I D   D A Y ! !");
         gotoxy(45,22);system("pause");
+        printToxy(45,21,"- - -                         ");
+        printToxy(45,22,"- - -                           ");
         goto b;
     }
     c:
-    printToxy(36,18,"                                     ");
-    printToxy(45,22,"                               ");
-    printToxy(78,8,"           ");
-    printToxy(54,8,"Birth year: ");
-    printToxy(75,8,"/ ");
-    gotoxy(78,8);scanf("%d",&bday->year);
-    if(bday->year<=1900 || bday->year>2022){
-        printToxy(45,18,"I N V A L I D   Y E A R ! !");
+    printToxy(91,10," /       ");
+    printToxy(61,10,"Birth year(1900-2022):");
+    gotoxy(94,10);scanf("%d",&x->year);
+    if(x->year<=1900 || x->year>2022){
+        printToxy(45,21,"I N V A L I D   Y E A R ! !");
         gotoxy(45,22);system("pause");
+        printToxy(45,21,"- - -                         ");
+        printToxy(45,22,"- - -                           ");
         goto c;
     }
+    printToxy(61,10,"                                     ");
+}
+void getContact(REC *x){
+    int index=2;
+    char ch;
+    do{
+        while((ch=getch())!=13 && index<10){
+            if (index<0){
+                index=0;
+            }
+            if(ch==8){
+                putch('\b'); putch(' ');
+                putch('\b'); index--;
+                continue;
+            }
+            if(isdigit(ch)){
+                x->contactNumber[index++]=ch;
+                putch('*');
+            }
+        }
+        if (index==10){
+            x->contactNumber[index++]=ch;
+            putchar('*');
+        }x->contactNumber[index]='\0';
+    }while(strlen(x->contactNumber)!=11);
 }
 
 void utility(REC *x){
@@ -633,9 +655,9 @@ void utility(REC *x){
     }
     if (p==NULL){
         system("cls");
-        createBlock(34,3,100," "); printToxy(50,5,"P A Y   B I L L S");
-        createBlock(34,7,100," "); printToxy(55,9,"Account not found.");
-        createBlock(34,11,59," "); gotoxy(50,13); system("pause");
+        box(3,34,3,100," "); printToxy(50,5,"P A Y   B I L L S");
+        box(3,34,7,100," "); printToxy(55,9,"Account not found.");
+        box(3,34,11,59," "); gotoxy(50,13); system("pause");
     }else{
         printf("[1]Meralco Bill\n");
         printf("[2]Maynilad Bill\n");
@@ -718,23 +740,23 @@ void decrypt(){
 
 int transactionMenu(){
     int UserNum;
-    createBlock(34,3,100," "); printToxy(50,5,"T R A N S A C T I O N      M E N U");
-    createBlock(34,7,40," [1]"); createBlock(42,7,100," "); printToxy(50,9,"BALANCE INQUIRY\n");
-    createBlock(34,11,40," [2]"); createBlock(42,11,100," "); printToxy(50,13,"WITHDRAW");
-    createBlock(34,15,40," [3]"); createBlock(42,15,100," "); printToxy(50,17,"DEPOSIT");
-    createBlock(34,19,40," [4]"); createBlock(42,19,100," "); printToxy(50,21,"FUND TRANSFER");
-    createBlock(34,23,40," [5]"); createBlock(42,23,100," "); printToxy(50,25,"OTHER TRANSACTIONS");
-    createBlock(34,27,40," [6]"); createBlock(42,27,100," "); printToxy(50,29,"EXIT");
-    createBlock(34,31,100," "); printToxy(50,33,"Enter your choice 1-6: ");scanf("%d", &UserNum);
+    box(3,34,3,100," "); printToxy(50,5,"T R A N S A C T I O N      M E N U");
+    box(3,34,7,40," [1]"); box(3,42,7,100," "); printToxy(50,9,"BALANCE INQUIRY\n");
+    box(3,34,11,40," [2]"); box(3,42,11,100," "); printToxy(50,13,"WITHDRAW");
+    box(3,34,15,40," [3]"); box(3,42,15,100," "); printToxy(50,17,"DEPOSIT");
+    box(3,34,19,40," [4]"); box(3,42,19,100," "); printToxy(50,21,"FUND TRANSFER");
+    box(3,34,23,40," [5]"); box(3,42,23,100," "); printToxy(50,25,"OTHER TRANSACTIONS");
+    box(3,34,27,40," [6]"); box(3,42,27,100," "); printToxy(50,29,"EXIT");
+    box(3,34,31,100," "); printToxy(50,33,"Enter your choice 1-6: ");scanf("%d", &UserNum);
     return UserNum;
 }
 int otherTransaction(){
     int UserNum;
-    createBlock(34,3,100," "); printToxy(47,5,"- O T H E R   T R A N S A C T I O N S -");
-    createBlock(34,7,40," [1]"); createBlock(42,7,100," "); printToxy(50,9,"ACCOUNT SETTINGS");
-    createBlock(34,11,40," [2]"); createBlock(42,11,100," "); printToxy(50,13,"PAY BILLS");
-    createBlock(34,15,40," [3]"); createBlock(42,15,100," "); printToxy(50,17,"BACK");
-    createBlock(34,19,100," ");printToxy(50,21,"Enter your choice 1-3: ");scanf("%d", &UserNum);
+    box(3,34,3,100," "); printToxy(47,5,"- O T H E R   T R A N S A C T I O N S -");
+    box(3,34,7,40," [1]"); box(3,42,7,100," "); printToxy(50,9,"ACCOUNT SETTINGS");
+    box(3,34,11,40," [2]"); box(3,42,11,100," "); printToxy(50,13,"PAY BILLS");
+    box(3,34,15,40," [3]"); box(3,42,15,100," "); printToxy(50,17,"BACK");
+    box(3,34,19,100," ");printToxy(50,21,"Enter your choice 1-3: ");scanf("%d", &UserNum);
     return UserNum;
 }
 
@@ -798,17 +820,39 @@ void printToxy(int x, int y, char *str){
     printf("%s",str);
 }
 
-void createBlock(int x, int y, int len, char *str){
+void box(int a, int x, int y, int len, char *str){
     int i;
-    for(i = x; i < len; i++){
-        printToxy(i,y,"_");
-        printToxy(i,y + 3,"_");
+    if(a==2){ //2 lines
+        for(i = x; i < len; i++){
+            printToxy(i,y,"_");
+            printToxy(i,y + 2,"_");
+        }
+        for(i = y + 1; i < y + 3; i++){
+            printToxy(x - 1,i,"|");
+            printToxy(len,i,"|");
+        }
+        printToxy(x + 1, y + 1,str);
+    }else if(a==3){ //3 lines
+        for(i = x; i < len; i++){
+            printToxy(i,y,"_");
+            printToxy(i,y + 3,"_");
+        }
+        for(i = y + 1; i < y + 4; i++){
+            printToxy(x - 1,i,"|");
+            printToxy(len,i,"|");
+        }
+        printToxy(x + 1, y + 2,str);
+    }else if(a==4){ //4 lines
+        for(i = x; i < len; i++){
+            printToxy(i,y,"_");
+            printToxy(i,y + 4,"_");
+        }
+        for(i = y + 1; i < y + 5; i++){
+            printToxy(x - 1,i,"|");
+            printToxy(len,i,"|");
+        }
+        printToxy(x + 1, y + 3,str);
     }
-    for(i = y + 1; i < y + 4; i++){
-        printToxy(x - 1,i,"|");
-        printToxy(len,i,"|");
-    }
-    printToxy(x + 1, y + 2,str);
 }
 
 void delay(int ms){
@@ -915,31 +959,4 @@ void cardAnimate(){
     printToxy(x,y + 7,"                   |__|     ");
     printToxy(x,y + 8,"                            ");
         delay(300);
-}
-
-void box(){
-int i;
-gotoxy(54,8);printf("Birth date:               ");
-printToxy(30,10,"Contact Number: 09");
-printToxy(30,12,"Initial Deposit (Min. 5,000): Php ");
-printToxy(30,14,"PIN Code: ");
-for(i=0;i<10;i++){
-    gotoxy(28,6+i);printf("|");
-    gotoxy(90,6+i);printf("|");
- }
-gotoxy(52,8);printf("|");
-gotoxy(52,9);printf("|");
-gotoxy(29,5);printf("_____________________________________________________________");
-gotoxy(29,7);printf("_____________________________________________________________");
-gotoxy(29,9);printf("_______________________|_____________________________________");
-gotoxy(29,11);printf("_____________________________________________________________");
-gotoxy(29,13);printf("_____________________________________________________________");
-gotoxy(29,15);printf("_____________________________________________________________");
-
-for(i=0;i<3;i++){
-gotoxy(28,17+i);printf("|");
-gotoxy(90,17+i);printf("|");
-}
-gotoxy(29,16);printf("_____________________________________________________________");
-gotoxy(29,19);printf("_____________________________________________________________");
 }
