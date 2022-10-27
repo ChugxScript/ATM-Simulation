@@ -12,8 +12,6 @@ by Andrew R. Oloroso and Armand Angelo C. Barrios*/
 /*
 Mga Problema/Kulang:
 1. design sa update nalang
-    -birthday
-    -contact number
     -pin
 */
 
@@ -39,7 +37,7 @@ int pin(REC *x, int a, int y, int z);
 int checkPin(char *n[7],int a,int b);
 void addNewATMaccount(REC x);
 void updateAccount(REC *x);
-void getBirthDay(REC *x);
+void getBirthDay(REC *x,int mrk);
 void getContact(REC *x);
 void balance(REC *x);
 void withdraw(REC *x);
@@ -67,13 +65,14 @@ int scanScreen(int a);
 void cardAnimate();
 
 //global variables
+int mrk;
 int balanceFD;
 int accNumFD,count;
 char nameFD[31];
 char pinCodeFD[7];
 
 int main(){
-    int accTransfer,index=2;
+    int accTransfer,index=2,mrk=0;
     REC bdo;
     srand(time(NULL));
     makenull();
@@ -96,7 +95,7 @@ int main(){
                 box(4,34,19,100,""); printToxy(45,21,"- - -"); printToxy(45,22,"- - -");
 
                 gotoxy(49,8);scanf(" %[^\n]s",bdo.accountName);
-                getBirthDay(&bdo); gotoxy(61,10); printf("Birth date: %d / %d / %d",bdo.month,bdo.day,bdo.year);
+                getBirthDay(&bdo,mrk); gotoxy(61,10); printf("Birth date: %d / %d / %d",bdo.month,bdo.day,bdo.year);
                 gotoxy(53,12); getContact(&bdo); gotoxy(35,12); printf("Contact Number: %s",bdo.contactNumber);
                 do{
                     printToxy(69,14,"               ");
@@ -573,14 +572,17 @@ void updateAccount(REC *x){
             box(3,34,23,100,""); printToxy(35,25,"Enter a Number: ");scanf("%d", &y);
             switch(y){
                 case 1: system("cls");
-                        box(3,34,3,100,"");printToxy(35,5,"Input new Account Name: ");scanf(" %[^\n]s",bdo.accountName);
+                        box(3,34,3,100,"");printToxy(35,5,"Input NEW Account Name: ");scanf(" %[^\n]s",bdo.accountName);
                         strcpy(p->atm.accountName,bdo.accountName); break;
                 case 2: system("cls");
-                        box(3,34,3,100,"");getBirthDay(&bdo);
+                        mrk=1;
+                        box(3,34,3,100,"");box(3,34,6,100,"");
+                        getBirthDay(&bdo,mrk);
                         p->atm.month=bdo.month; p->atm.day=bdo.day; p->atm.year=bdo.year;
                         break;
-                case 3: bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
-                        printf("\nInput new Contact Number: 09");
+                case 3: system("cls");
+                        bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
+                        box(3,34,3,100,"");printToxy(35,5,"Input NEW Contact Number: 09");
                         b:
                         while((ch=getch())!=13 && index<10){
                             if (index<0){
@@ -604,13 +606,23 @@ void updateAccount(REC *x){
                             goto b;
                         strcpy(p->atm.contactNumber,bdo.contactNumber);
                         break;
-                case 4: printf("\nPlease Enter CURRENT Pin Code\n");system("pause");
-                        if(pin(&bdo,2,1,1)!=1){
-                            printf("\nPlease Enter NEW Pin Code");pin(&bdo,1,1,1);
-                            strcpy(p->atm.pinCode,bdo.pinCode);
-                        }else{
-                            printf("\nToo many failed attemps. Please try later.");
-                        }break;
+                case 4: system("cls");
+                        box(3,34,10,100," ");printToxy(35,12,"Pin Code: ");
+                        box(4,34,13,100," ");
+                        gotoxy(45,12);
+                        if(pin(&bdo,2,35,15)!=1){
+                        /*
+                                system("cls");
+                                printToxy(35,12,"Please Enter NEW Pin Code");pin(&bdo,2,35,15);
+                                strcpy(p->atm.pinCode,bdo.pinCode);
+                            }else{
+                                printToxy(35,15,"I N V A L I D   P I N");
+                                gotoxy(35,16);system("pause");
+                            }
+
+                          printToxy(35,15,"Too many failed attempts. Please try again later.");
+                        */gotoxy(35,16);system("pause");
+                        break;
                 case 5: box(4,34,27,100,""); gotoxy(35,29); printf("%s's account is successfully updated.", p->atm.accountName);
                         gotoxy(35,30); system("pause");break;
                 default: box(4,34,27,100,""); gotoxy(35,29); printf("Select 1-6 only"); gotoxy(35,30); system("pause");break;
@@ -619,41 +631,78 @@ void updateAccount(REC *x){
     }
 }
 
-void getBirthDay(REC *x){
-    a:
-    printToxy(84,10,"                |     ");
-    printToxy(61,10,"Birth month(01-12):");
-    gotoxy(84,10);scanf("%d",&x->month);
-    if(x->month<=0 || x->month>12){
-        printToxy(45,21,"I N V A L I D   M O N T H !!");
-        gotoxy(45,22);system("pause");
-        printToxy(45,21,"- - -                         ");
-        printToxy(45,22,"- - -                           ");
-        goto a;
-    }
-    b:
-    printToxy(86,10," /            |     ");
-    printToxy(61,10,"Birth  day (01-31):");
-    gotoxy(89,10);scanf("%d",&x->day);
-    if(x->day<=0 || x->day>31){
-        printToxy(45,21,"I N V A L I D   D A Y ! !");
-        gotoxy(45,22);system("pause");
-        printToxy(45,21,"- - -                         ");
-        printToxy(45,22,"- - -                           ");
-        goto b;
-    }
-    c:
-    printToxy(91,10," /       |     ");
-    printToxy(61,10,"Birth year(1900-2022):");
-    gotoxy(94,10);scanf("%d",&x->year);
-    if(x->year<=1900 || x->year>2022){
-        printToxy(45,21,"I N V A L I D   Y E A R ! !");
-        gotoxy(45,22);system("pause");
-        printToxy(45,21,"- - -                         ");
-        printToxy(45,22,"- - -                           ");
-        goto c;
-    }
+void getBirthDay(REC *x, int mrk){
+    if(mrk=1){
+        a:
+        printToxy(35,7,"- - -                         ");
+        printToxy(35,8,"- - -                           ");
+        printToxy(58,5,"    /     ");
+        printToxy(35,5,"Birth month(01-12):");
+        gotoxy(58,5);scanf("%d",&x->month);
+        if(x->month<=0 || x->month>12){
+            printToxy(35,7,"I N V A L I D   M O N T H ! !      ");
+            gotoxy(35,8);system("pause");
+            goto a;
+        }
+        b:
+        printToxy(35,7,"- - -                         ");
+        printToxy(35,8,"- - -                           ");
+        printToxy(60,5," /                  ");
+        printToxy(35,5,"Birth day (01-31):");
+        gotoxy(63,5);scanf("%d",&x->day);
+        if(x->day<=0 || x->day>31){
+            printToxy(35,7,"I N V A L I D   D A Y ! !      ");
+            gotoxy(35,8);system("pause");
+
+            goto b;
+        }
+        c:
+        printToxy(35,7,"- - -                         ");
+        printToxy(35,8,"- - -                           ");
+        printToxy(65,5," /             ");
+        printToxy(35,5,"Birth year(1900-2022):");
+        gotoxy(68,5);scanf("%d",&x->year);
+        if(x->year<=1900 || x->year>2022){
+            printToxy(35,7,"I N V A L I D   Y E A R ! !      ");
+            gotoxy(35,8);system("pause");
+            goto c;
+        }
+    }else{
+        a2:
+        printToxy(84,10,"                |     ");
+        printToxy(61,10,"Birth month(01-12):");
+        gotoxy(84,10);scanf("%d",&x->month);
+        if(x->month<=0 || x->month>12){
+            printToxy(45,21,"I N V A L I D   M O N T H !!");
+            gotoxy(45,22);system("pause");
+            printToxy(45,21,"- - -                         ");
+            printToxy(45,22,"- - -                           ");
+            goto a2;
+        }
+        b2:
+        printToxy(86,10," /            |     ");
+        printToxy(61,10,"Birth  day (01-31):");
+        gotoxy(89,10);scanf("%d",&x->day);
+        if(x->day<=0 || x->day>31){
+            printToxy(45,21,"I N V A L I D   D A Y ! !");
+            gotoxy(45,22);system("pause");
+            printToxy(45,21,"- - -                         ");
+            printToxy(45,22,"- - -                           ");
+            goto b2;
+        }
+        c2:
+        printToxy(91,10," /       |     ");
+        printToxy(61,10,"Birth year(1900-2022):");
+        gotoxy(94,10);scanf("%d",&x->year);
+        if(x->year<=1900 || x->year>2022){
+            printToxy(45,21,"I N V A L I D   Y E A R ! !");
+            gotoxy(45,22);system("pause");
+            printToxy(45,21,"- - -                         ");
+            printToxy(45,22,"- - -                           ");
+            goto c2;
+        }
     printToxy(61,10,"                                     ");
+    }
 }
 void getContact(REC *x){
     int index=2;
