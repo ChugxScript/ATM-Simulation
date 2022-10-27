@@ -12,6 +12,9 @@ by Andrew R. Oloroso and Armand Angelo C. Barrios*/
 /*
 Mga Problema/Kulang:
 1. design HAHAHA
+
+error sa birthday
+error sa deposit
 */
 
 typedef struct details{
@@ -56,6 +59,7 @@ void setFontStyle(int FontSize);
 void delay(int ms);
 void titleScreen();
 void createBlock(int x, int y, int len, char *str);
+void box();
 //animation functions
 void loading();
 int scanScreen(int a);
@@ -75,23 +79,23 @@ int main(){
     makenull();
     setFontStyle(18);
     switch(insertcard()){
-        case 1: bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
+        case 1: system("cls");
+                box();
+                bdo.contactNumber[0]='0'; bdo.contactNumber[1]='9';
                 do{
                     bdo.accountNumber = rand() % 999999 + 10000;
                     accNumFD = bdo.accountNumber;
                 }while(uniqueAcc(bdo.accountNumber)==1);
-                system("cls");
-                printToxy(38,4,"REGISTRATION MODULE: Creating new ATM Account");
-                printToxy(38,6,"Please fill out the following informations:");
-                gotoxy(45,8); printf("Account Number: %d",bdo.accountNumber);
-                printToxy(45,9,"Account Name: ");scanf(" %[^\n]s",bdo.accountName);
+                printToxy(40,4,"R E G I S T R A T I O N    M O D U L E");
+                gotoxy(30,8);printf("Account Number: %d",bdo.accountNumber);
+                printToxy(30,6,"Account Name: ");scanf(" %[^\n]s",bdo.accountName);
                 birthDayy(&bdo);system("cls");
-                printToxy(38,4,"REGISTRATION MODULE: Creating new ATM Account");
-                printToxy(38,6,"Please fill out the following informations:");
-                gotoxy(45,8); printf("Account Number: %d",bdo.accountNumber);
-                gotoxy(45,9); printf("Account Name: %s",bdo.accountName);
-                gotoxy(45,10); printf("Birthdate (MM/DD/YYYY): %d / %d / %d",bdo.month,bdo.day,bdo.year);
-                printToxy(45,11,"Contact Number: 09");
+                box();
+                printToxy(40,4,"R E G I S T R A T I O N    M O D U L E");
+                gotoxy(30,8);printf("Account Number: %d",bdo.accountNumber);
+                gotoxy(30,6);printf("Account Name: %s",bdo.accountName);
+                gotoxy(54,8);printf("Birth date: %d / %d / %d",bdo.month,bdo.day,bdo.year);
+                printToxy(30,10,"Contact Number: 09");
                 a:
                 while((ch=getch())!=13 && index<10){
                     if (index<0){
@@ -113,16 +117,20 @@ int main(){
                 }bdo.contactNumber[index]='\0';
                 if(strlen(bdo.contactNumber)!=11)
                     goto a;
-                gotoxy(45,11); printf("Contact Number: %s",bdo.contactNumber);
-
+                gotoxy(30,10); printf("Contact Number: %s",bdo.contactNumber);
                 do{
-                    printToxy(45,12,"Initial Deposit (Min. 5,000): Php ");scanf("%d", &bdo.balance);
-                    if(bdo.balance<5000)
-                        printToxy(45,13,"Minimum deposit is Php 5000.");
+                    printToxy(45,18,"                            ");
+                    printToxy(30,12,"                                                 ");
+                    printToxy(45,22,"                               ");
+                    printToxy(30,12,"Initial Deposit (Min. 5,000): Php ");scanf("%d", &bdo.balance);
+                    if(bdo.balance<5000){
+                        printToxy(45,18,"MIN. DEPOSIT IS PHP 5000 ! !");
+                        gotoxy(45,22);system("pause");
+                    }
                 }while(bdo.balance<5000);
                 pin(&bdo,1);
                 addNewATMaccount(bdo);
-                printToxy(45,15,"REGISTRATION SUCCESSFUL"); gotoxy(45,16);system("pause");
+                printToxy(36,18,"R E G I S T R A T I O N    S U C C E S S F U L");gotoxy(45,22);system("pause");
                 system("cls");titleScreen();
                 break;
         case 2: strcpy(bdo.accountName,nameFD);
@@ -249,7 +257,7 @@ int pin(REC *x, int a){
     char ch;
     if(a==1){
         b:
-        printToxy(50,13,"PIN Code: ");
+        printToxy(30,14,"PIN Code: ");
         while((ch=getch())!=13 && index<5){
             if (index<0){
                 index=0;
@@ -281,7 +289,7 @@ int pin(REC *x, int a){
                 break;
             index=0;
             system ("cls");
-            printToxy(50,13,"PIN Code: ");
+            printToxy(30,14,"PIN Code: ");
             while((ch=getch())!=13 && index<5){
                 if (index<0){
                     index=0;
@@ -305,7 +313,8 @@ int pin(REC *x, int a){
         }while(checkPin(&x->pinCode)==1);
     }
     if(count==5){
-        printf("\nToo many failed attemps. Please try later.\n");system("pause");
+        printToxy(35,18,"Too many failed attempts. Please try later.");
+        gotoxy(45,22);system("pause");
         return 1;
     }else{
         return 2;
@@ -578,33 +587,38 @@ void updateAccount(REC *x){
 }
 
 void birthDayy(REC *bday){
-    printToxy(45,10,"Birth MONTH (01-12): ");
     a:
-    printToxy(38,11,"                                               ");
-    printToxy(68,10,"                                               ");
-    gotoxy(68,10);scanf("%d",&bday->month);
+    printToxy(36,18,"                                     ");
+    printToxy(54,8,"               ");
+    printToxy(45,22,"                               ");
+    printToxy(54,8,"Birth month: ");
+    gotoxy(67,8);scanf("%d",&bday->month);
     if(bday->month<=0 || bday->month>12){
-        printToxy(38,11,"Invalid Month. "); system("pause");
+        printToxy(45,18,"I N V A L I D   M O N T H !!");
+        gotoxy(45,22);system("pause");
         goto a;
     }
-    printToxy(45,10,"                     ");
-    printToxy(45,10,"Birth  DAY (01-31) : ");
     b:
-    printToxy(38,11,"                                               ");
-    printToxy(71,10,"/                                              ");
-    gotoxy(73,10);scanf("%d",&bday->day);
+    printToxy(41,18,"                                     ");
+    printToxy(54,8,"Birth day:  ");
+    printToxy(70,8,"/   ");
+    printToxy(45,22,"                               ");
+    gotoxy(72,8);scanf("%d",&bday->day);
     if(bday->day<=0 || bday->day>31){
-        printToxy(38,11,"Invalid Day.  ");system("pause");
+        printToxy(46,18,"I N V A L I D   D A Y ! !");
+        gotoxy(45,22);system("pause");
         goto b;
     }
-    printToxy(45,10,"                     ");
-    printToxy(45,10,"Birth YEAR(1900-2022): ");
     c:
-    printToxy(38,11,"                                               ");
-    printToxy(76,10,"/                                              ");
-    gotoxy(78,10);scanf("%d",&bday->year);
+    printToxy(36,18,"                                     ");
+    printToxy(45,22,"                               ");
+    printToxy(78,8,"           ");
+    printToxy(54,8,"Birth year: ");
+    printToxy(75,8,"/ ");
+    gotoxy(78,8);scanf("%d",&bday->year);
     if(bday->year<=1900 || bday->year>2022){
-        printToxy(38,11,"Invalid Year.  ");system("pause");
+        printToxy(45,18,"I N V A L I D   Y E A R ! !");
+        gotoxy(45,22);system("pause");
         goto c;
     }
 }
@@ -901,4 +915,31 @@ void cardAnimate(){
     printToxy(x,y + 7,"                   |__|     ");
     printToxy(x,y + 8,"                            ");
         delay(300);
+}
+
+void box(){
+int i;
+gotoxy(54,8);printf("Birth date:               ");
+printToxy(30,10,"Contact Number: 09");
+printToxy(30,12,"Initial Deposit (Min. 5,000): Php ");
+printToxy(30,14,"PIN Code: ");
+for(i=0;i<10;i++){
+    gotoxy(28,6+i);printf("|");
+    gotoxy(90,6+i);printf("|");
+ }
+gotoxy(52,8);printf("|");
+gotoxy(52,9);printf("|");
+gotoxy(29,5);printf("_____________________________________________________________");
+gotoxy(29,7);printf("_____________________________________________________________");
+gotoxy(29,9);printf("_______________________|_____________________________________");
+gotoxy(29,11);printf("_____________________________________________________________");
+gotoxy(29,13);printf("_____________________________________________________________");
+gotoxy(29,15);printf("_____________________________________________________________");
+
+for(i=0;i<3;i++){
+gotoxy(28,17+i);printf("|");
+gotoxy(90,17+i);printf("|");
+}
+gotoxy(29,16);printf("_____________________________________________________________");
+gotoxy(29,19);printf("_____________________________________________________________");
 }
