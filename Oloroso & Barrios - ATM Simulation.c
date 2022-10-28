@@ -89,7 +89,7 @@ int main(){
                 box(2,34,11,100,""); printToxy(35,12,"Contact Number: 09");
                 box(2,59,9,100,""); printToxy(61,10,"Birth date:  /  /");
                 box(2,34,13,100,""); printToxy(35,14,"Initial Deposit (Min. 5,000): Php ");
-                box(3,34,15,100,""); printToxy(35,16,"PIN Code: ");
+                box(3,34,15,100,""); printToxy(35,17,"PIN Code: ");
                 box(4,34,19,100,""); printToxy(45,21,"- - -"); printToxy(45,22,"- - -");
 
                 gotoxy(49,8);scanf(" %[^\n]s",bdo.accountName);
@@ -107,7 +107,7 @@ int main(){
                     }
                 }while(bdo.balance<5000);
 
-                pin(&bdo,1,45,21,35,16); gotoxy(35,16); printf("PIN Code: %s",bdo.pinCode);
+                pin(&bdo,1,45,17,45,21); gotoxy(35,17); printf("PIN Code: %s",bdo.pinCode);
                 printToxy(45,21,"R E G I S T R A T I O N    S U C C E S S F U L"); gotoxy(45,22);system("pause");
                 addNewATMaccount(bdo);
                 system("cls");titleScreen();
@@ -159,7 +159,7 @@ int main(){
                         case 1: system("cls");
                                 box(3,34,10,100," "); printToxy(35,12,"PIN Code: ");
                                 box(4,34,13,100," ");
-                                if(pin(&bdo,2,35,15,42,12)!=1){
+                                if(pin(&bdo,2,45,12,35,15)!=1){
                                     updateAccount(&bdo);
                                 }break;
                         case 2: utility(&bdo); break;
@@ -264,10 +264,7 @@ int pin(REC *x, int a,int b,int c,int y,int z){
                 putchar('*');
             }
         }
-        if (index==5){
-            x->pinCode[index++]=ch;
-            putchar('*');
-        }x->pinCode[index]='\0';
+        x->pinCode[index]='\0';
         if(strlen(x->pinCode)<4){
             index=0;
             printToxy(y,z,"I N V A L I D   P I N");
@@ -299,10 +296,7 @@ int pin(REC *x, int a,int b,int c,int y,int z){
                  putchar('*');
                 }
             }
-            if (index==5){
-                x->pinCode[index++]=ch;
-                putchar('*');
-            }x->pinCode[index]='\0';
+            x->pinCode[index]='\0';
             if(strlen(x->pinCode)<4){
                 printToxy(y,z,"I N V A L I D   P I N");
                 gotoxy(y,z+1);system("pause");
@@ -408,11 +402,11 @@ void withdraw(REC *x){
                 box(3,34,19,100," "); printToxy(45,21,"- - -");
                 printToxy(83,9,"Php ");scanf("%d",&withdraww);
                 if(withdraww>(p->atm.balance)){
-                    printToxy(50,13,"Insufficient Balance."); gotoxy(45,17); system("pause");
+                    printToxy(45,13,"Insufficient Balance."); gotoxy(45,17); system("pause");
                 }else if(withdraww<=0){
-                    printToxy(50,13,"Invalid amount.");gotoxy(45,17); system("pause");
+                    printToxy(45,13,"Invalid amount.");gotoxy(45,17); system("pause");
                 }else if(p->atm.balance==0){
-                    printToxy(50,13,"Insufficient Balance.");gotoxy(45,17); system("pause");
+                    printToxy(45,13,"Insufficient Balance.");gotoxy(45,17); system("pause");
                 }
             }while(withdraww>(p->atm.balance) || withdraww<=0 || p->atm.balance==0);
             p->atm.balance-=withdraww;
@@ -506,11 +500,14 @@ void fundTransfer(REC *x,int a){
             if(count==5){
                 printToxy(35,25,"Too many failed attempts. Please try later.");goto a;
             }
+            printToxy(65,21,"                             ");
             gotoxy(35,21); printf("Input amount to transfer: Php ");scanf("%d",&transfer);
             if(transfer>x->balance){
                  printToxy(35,25,"Insufficient balance."); gotoxy(35,29); system("pause");
+                 printToxy(35,25,"- - -                 ");printToxy(35,29,"- - -                                ");
             }else if(transfer<=0){
                 printToxy(35,25,"Minimum transfer amount is Php 1."); gotoxy(35,29); system("pause");
+                printToxy(35,25,"- - -                             ");printToxy(35,29,"- - -                                 ");
             }
         }while(transfer>x->balance || transfer<=0);
         p->atm.balance+=transfer;
@@ -638,7 +635,7 @@ void getBirthDay(REC *x, int mrk){
         a2:
         printToxy(35,7,"- - -                         ");
         printToxy(35,8,"- - -                           ");
-        printToxy(58,5,"   /                                      |      ");
+        printToxy(58,5,"                                          |      ");
         printToxy(35,5,"Birth month(01-12):");
         gotoxy(58,5);scanf("%d",&x->month);
         if(x->month<=0 || x->month>12){
