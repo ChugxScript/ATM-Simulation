@@ -410,6 +410,7 @@ void withdraw(REC *x){
                 }
             }while(withdraww>(p->atm.balance) || withdraww<=0 || p->atm.balance==0);
             p->atm.balance-=withdraww;
+            x->balance-=withdraww;
             printToxy(45,13,"Withdraw successful.");
             gotoxy(45,17);printf("Your new balance: Php %d", p->atm.balance);
             gotoxy(45,21);system("pause");
@@ -462,6 +463,7 @@ void deposit(REC *x){
             }
         }while(depositt<=0 || depositt>=999999999);
         p->atm.balance+=depositt;
+        x->balance+=depositt;
         printToxy(35,13,"Deposit successful.");
         gotoxy(35,17); printf("Your new balance: Php %d",p->atm.balance);
         gotoxy(35,21); system("pause");
@@ -730,6 +732,7 @@ void utility(REC *x){
                         case 1: box(4,34,31,100," ");
                                 if(p->atm.balance>=Meralco){
                                     p->atm.balance-=Meralco;
+                                    x->balance-=Meralco;
                                     printToxy(35,33,"Payment successful.");
                                 }else{
                                     printToxy(35,33,"Insufficient Balance.");
@@ -753,6 +756,7 @@ void utility(REC *x){
                         case 1: box(4,34,31,100," ");
                                 if(p->atm.balance>=Maynilad){
                                     p->atm.balance-=Maynilad;
+                                    x->balance-=Maynilad;
                                     printToxy(35,33,"Payment successful.");
                                 }else{
                                     printToxy(35,33,"Insufficient Balance.");
