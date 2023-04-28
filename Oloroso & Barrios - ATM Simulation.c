@@ -9,11 +9,6 @@ by Andrew R. Oloroso and Armand Angelo C. Barrios*/
 #include <time.h>
 #include <windows.h>
 
-/*
-Mga Problema/Kulang:
-1. test nalang kung may error pa
-*/
-
 typedef struct details{
     int accountNumber;
     char accountName[31];
